@@ -3,1182 +3,477 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>삼성중공업 클로드 기본교육 Lv.1 — Chat 1</title>
-<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<title>아르바이트 지원</title>
 <style>
-:root{
-  --navy:#08214f; --blue:#1428A0; --blue2:#2f63e6; --cyan:#12b5d6;
-  --ink:#132038; --muted:#5f6f8c; --line:#e4eaf3; --line2:#d5deed;
-  --ok:#12996b; --warn:#e08600; --bad:#e03b3b; --sky:#eef3fd;
-  --card:#ffffff; --code:#0c1730;
-  --shadow:0 18px 50px -18px rgba(12,30,70,.35);
-  --shadow-sm:0 6px 20px -10px rgba(12,30,70,.28);
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
-body{
-  font-family:"Pretendard","Pretendard Variable",-apple-system,"Malgun Gothic",sans-serif;
-  background:radial-gradient(120% 120% at 50% 0%,#12294f 0%,#0a1a37 55%,#070f22 100%);
-  color:var(--ink);overflow:hidden;-webkit-font-smoothing:antialiased;
-}
-#viewport{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
-#stage{width:1280px;height:720px;position:relative;transform-origin:center center;
-  border-radius:22px;overflow:hidden;box-shadow:0 40px 120px -30px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.05)}
-.slide{position:absolute;inset:0;background:#fff;padding:56px 74px;
-  opacity:0;visibility:hidden;transform:translateX(40px) scale(.985);
-  transition:opacity .5s ease,transform .55s cubic-bezier(.22,.72,.24,1);display:flex;flex-direction:column}
-.slide.active{opacity:1;visibility:visible;transform:none;z-index:2}
-.slide.prev{transform:translateX(-40px) scale(.985)}
-.slide::before{content:"";position:absolute;top:0;left:0;right:0;height:6px;
-  background:linear-gradient(90deg,var(--blue),var(--blue2),var(--cyan))}
-.slide.cover::before{display:none}
+  :root{
+    --bg:#f4f6fb; --card:#ffffff; --line:#e2e6ef; --ink:#1f2430; --muted:#7b8494;
+    --accent:#3b6ef5; --accent-soft:#e7eeff; --red:#e5484d; --red-soft:#fdecec;
+    --green:#1f9d63; --range:#cfe0ff; --range-edge:#3b6ef5; --nolec:#8a94a6; --nolec-soft:#eceef3;
+    --lv1:#eab308; --lv1-soft:#fff4cc; --lv1-ink:#8a6d00;
+    --lv2:#2f6fed; --lv2-soft:#d8e6ff; --lv2-ink:#1a4bb5;
+    --need:#6b4ef0; --need-soft:#ece7ff;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Malgun Gothic','Apple SD Gothic Neo',system-ui,-apple-system,sans-serif;
+    background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;}
+  header{background:var(--card);border-bottom:1px solid var(--line);padding:16px 20px;
+    position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  header h1{font-size:19px;margin:0;letter-spacing:-.3px;}
+  header .sub{font-size:12px;color:var(--muted);margin-top:2px;}
+  .modes{display:flex;gap:6px;background:var(--bg);padding:4px;border-radius:12px;}
+  .modes button{border:0;background:transparent;padding:8px 16px;border-radius:9px;font-size:14px;
+    cursor:pointer;color:var(--muted);font-weight:600;}
+  .modes button.active{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08);}
+  .wrap{max-width:1080px;margin:0 auto;padding:20px;display:grid;grid-template-columns:1fr 320px;gap:20px;}
+  @media(max-width:880px){.wrap{grid-template-columns:1fr;}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;}
+  .card h2{font-size:15px;margin:0 0 12px;letter-spacing:-.2px;}
+  .card h3{font-size:13px;margin:16px 0 8px;color:var(--muted);}
+  .side{position:sticky;top:88px;align-self:start;display:flex;flex-direction:column;gap:16px;}
 
-body.js .slide .r{opacity:0;transform:translateY(16px)}
-body.js .slide.active .r{opacity:1;transform:none;
-  transition:opacity .55s ease,transform .6s cubic-bezier(.2,.7,.2,1)}
+  /* Calendar */
+  .cal-scroll{max-height:calc(100vh - 150px);overflow:auto;padding-right:4px;}
+  .month{margin-bottom:22px;}
+  .month-title{font-size:15px;font-weight:700;margin:0 0 8px;padding-left:2px;}
+  .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+  .dow{text-align:center;font-size:11px;font-weight:700;color:var(--muted);padding:4px 0;}
+  .dow.sun,.dow.sat{color:var(--red);}
+  .cell{position:relative;min-height:56px;border:1px solid var(--line);border-radius:9px;padding:4px 5px;
+    font-size:13px;cursor:pointer;background:#fff;user-select:none;transition:background .08s;overflow:hidden;}
+  .cell.empty{border:0;background:transparent;cursor:default;}
+  .cell:not(.empty):hover{filter:brightness(.97);}
+  .cell .num{font-weight:600;line-height:1;}
+  .cell.red .num{color:var(--red);}
+  .cell .hol{font-size:9px;color:var(--red);margin-top:2px;line-height:1.1;word-break:keep-all;}
+  .cell.nolec{background:var(--nolec-soft);}
+  .cell.lv1{background:var(--lv1-soft);border-color:#e6d488;}
+  .cell.lv2{background:var(--lv2-soft);border-color:#a9c6f5;}
+  .cell .tag{position:absolute;left:4px;bottom:3px;font-size:8px;color:#fff;padding:1px 4px;border-radius:4px;font-weight:700;}
+  .cell .tag.t-nolec{background:var(--nolec);}
+  .cell .tag.t-lv1{background:var(--lv1);color:#3d2f00;}
+  .cell .tag.t-lv2{background:var(--lv2);}
+  .cell.in-range{background:var(--range);}
+  .cell.range-edge{background:var(--range-edge);color:#fff;}
+  .cell.range-edge .num{color:#fff;}
+  .cell.range-edge.red .num{color:#ffe0e0;}
+  .cell.today{box-shadow:inset 0 0 0 2px var(--accent);}
+  .cell.today .num{color:var(--accent);}
+  .cell .todaylbl{font-size:9px;font-weight:700;color:var(--accent);margin-top:2px;line-height:1;}
+  .cell .dot{position:absolute;right:4px;top:4px;min-width:15px;height:15px;padding:0 3px;border-radius:8px;
+    background:var(--green);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+  .cell .need{position:absolute;right:4px;bottom:3px;font-size:8px;font-weight:700;padding:1px 4px;border-radius:4px;
+    background:var(--need-soft);color:var(--need);}
+  .cell .need.ok{background:#d7f2e3;color:#1f7a4d;}
+  .cell .need.short{background:var(--red-soft);color:var(--red);}
 
-.eyebrow{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;
-  background:var(--sky);color:var(--blue);font-weight:700;font-size:15px;
-  padding:8px 16px;border-radius:30px;letter-spacing:.04em}
-.head{display:flex;align-items:center;gap:16px;margin:14px 0 6px}
-.head .num{flex:0 0 auto;width:52px;height:52px;border-radius:15px;color:#fff;font-size:22px;font-weight:800;
-  display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(135deg,var(--blue),var(--blue2));box-shadow:0 10px 22px -8px rgba(20,40,160,.6)}
-h2{font-size:37px;line-height:1.15;color:var(--navy);font-weight:800;letter-spacing:-.01em}
-.sub{color:var(--muted);font-size:19px;margin:6px 0 18px;font-weight:500;line-height:1.5}
-p{font-size:19px;line-height:1.6;color:#2a3653}
-strong{color:var(--navy);font-weight:700}
-.fill{flex:1}
+  /* Legend */
+  .legend{display:flex;flex-wrap:wrap;gap:10px 14px;font-size:11px;color:var(--muted);margin-top:12px;}
+  .legend span{display:flex;align-items:center;gap:5px;}
+  .sw{width:12px;height:12px;border-radius:3px;display:inline-block;border:1px solid var(--line);}
 
-.grid{display:grid;gap:18px}
-.g2{grid-template-columns:1fr 1fr}
-.g3{grid-template-columns:repeat(3,1fr)}
-.g4{grid-template-columns:repeat(4,1fr)}
-.cols{display:grid;gap:26px;flex:1;align-items:start}
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 24px;
-  box-shadow:var(--shadow-sm);transition:transform .25s ease,box-shadow .25s ease}
-.card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
-.card h3{font-size:19px;color:var(--navy);margin-bottom:8px;display:flex;align-items:center;gap:10px;font-weight:700}
-.card p{font-size:16px;line-height:1.55;color:#3a4763}
-.chip{display:inline-block;background:var(--sky);color:var(--blue);font-size:14px;font-weight:700;
-  padding:4px 12px;border-radius:9px;margin:3px 5px 3px 0}
-.ico{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:11px;
-  background:linear-gradient(135deg,#eaf1ff,#dbe7ff);font-size:20px}
-.numdot{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:9px;
-  background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;font-weight:800;font-size:15px;flex:0 0 auto}
+  /* Form */
+  label{font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:5px;}
+  input[type=text],input[type=password]{width:100%;padding:10px 12px;border:1px solid var(--line);
+    border-radius:10px;font-size:14px;outline:none;font-family:inherit;}
+  input:focus{border-color:var(--accent);}
+  .field{margin-bottom:14px;}
+  .range-box{background:var(--bg);border-radius:10px;padding:12px;font-size:13px;line-height:1.7;margin-bottom:14px;}
+  .range-box b{color:var(--accent);}
+  .btn{width:100%;border:0;background:var(--accent);color:#fff;padding:12px;border-radius:11px;
+    font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
+  .btn:hover{filter:brightness(1.05);}
+  .btn.ghost{background:var(--bg);color:var(--ink);}
+  .btn.red{background:var(--red);}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .hint{font-size:12px;color:var(--muted);line-height:1.6;}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1f2430;color:#fff;
+    padding:12px 20px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:50;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px);}
 
-.why{border-left:5px solid var(--blue);background:linear-gradient(90deg,#f2f7ff,#fbfdff);
-  border-radius:0 14px 14px 0;padding:15px 22px;box-shadow:var(--shadow-sm)}
-.why b{color:var(--blue);display:block;margin-bottom:3px;font-size:16px}
-.why p{font-size:16px;line-height:1.55}
-.warn{border-left:5px solid var(--warn);background:linear-gradient(90deg,#fff7ea,#fffdf8);
-  border-radius:0 14px 14px 0;padding:15px 22px;box-shadow:var(--shadow-sm)}
-.warn b{color:#b56a00;display:block;margin-bottom:3px;font-size:16px}
-.warn li{font-size:15.5px;margin:2px 0 2px 20px;line-height:1.5}
-.danger{border-left:5px solid var(--bad);background:linear-gradient(90deg,#fdf0f0,#fffbfb);
-  border-radius:0 14px 14px 0;padding:15px 22px;box-shadow:var(--shadow-sm)}
-.danger b{color:var(--bad);display:block;margin-bottom:3px;font-size:16px}
-.danger p,.danger li{font-size:15.5px;line-height:1.55;color:#5a2a2a}
+  /* Brush toolbar */
+  .brush{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+  .brush button{border:1px solid var(--line);background:#fff;padding:9px 6px;border-radius:9px;
+    font-size:13px;font-weight:600;cursor:pointer;color:var(--ink);font-family:inherit;}
+  .brush button.on{border-width:2px;}
+  .brush button[data-b=nolec].on{border-color:var(--nolec);background:var(--nolec-soft);}
+  .brush button[data-b=lv1].on{border-color:var(--lv1);background:var(--lv1-soft);}
+  .brush button[data-b=lv2].on{border-color:var(--lv2);background:var(--lv2-soft);}
+  .brush button[data-b=clear].on{border-color:var(--red);background:var(--red-soft);color:var(--red);}
+  .hours{display:flex;align-items:center;gap:6px;margin-top:10px;}
+  .hours .lab{font-size:12px;font-weight:600;color:var(--muted);}
+  .hours button{border:1px solid var(--line);background:#fff;padding:7px 14px;border-radius:9px;
+    font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+  .hours button.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);}
 
-.prompt{position:relative;background:var(--code);border-radius:16px;padding:22px 22px 20px;color:#dfe8fb;
-  box-shadow:var(--shadow);overflow:hidden}
-.prompt::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 60% at 100% 0,rgba(47,99,230,.25),transparent 60%);pointer-events:none}
-.prompt .lbl{display:inline-block;background:var(--blue2);color:#fff;font-size:12.5px;font-weight:700;
-  padding:4px 12px;border-radius:8px;letter-spacing:.03em;margin-bottom:12px}
-.prompt pre{white-space:pre-wrap;font-family:"D2Coding","Consolas",monospace;font-size:14.5px;line-height:1.62;color:#e7eefc;position:relative;z-index:1}
-.copy{position:absolute;top:18px;right:18px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);
-  color:#dbe7ff;font-size:12.5px;font-weight:700;padding:7px 13px;border-radius:9px;cursor:pointer;transition:.18s;z-index:2}
-.copy:hover{background:var(--blue2);border-color:var(--blue2)}
-
-.example{border:1.5px solid #cdeadb;background:linear-gradient(180deg,#f2fcf6,#fbfffc);
-  border-radius:16px;padding:18px 22px;box-shadow:var(--shadow-sm);overflow:auto}
-.example .tag{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--ok),#16b47c);
-  color:#fff;font-size:12.5px;font-weight:700;padding:5px 13px;border-radius:9px;margin-bottom:10px}
-.example p,.example li{font-size:15.5px;line-height:1.55}
-.example ul,.example ol{margin:4px 0 4px 20px}
-.example h4{color:var(--navy);font-size:15.5px;margin:11px 0 3px;font-weight:700}
-
-table{width:100%;border-collapse:separate;border-spacing:0;font-size:14.5px;background:#fff;
-  border-radius:12px;overflow:hidden;box-shadow:var(--shadow-sm)}
-th{background:linear-gradient(135deg,var(--navy),#123a86);color:#fff;padding:11px 13px;text-align:left;font-weight:700;font-size:13.5px}
-td{padding:9px 13px;border-bottom:1px solid var(--line);color:#2b3a55}
-tr:last-child td{border-bottom:none}
-tr:nth-child(even) td{background:#f7faff}
-.b-bad{color:var(--bad);font-weight:700}.b-warn{color:var(--warn);font-weight:700}.b-ok{color:var(--ok);font-weight:700}
-.mini th,.mini td{font-size:13px;padding:8px 11px}
-
-.stat{background:linear-gradient(160deg,#fff,#f3f7ff);border:1px solid var(--line);border-radius:18px;
-  padding:20px 22px;box-shadow:var(--shadow-sm);text-align:center}
-.stat .big{font-size:46px;font-weight:800;line-height:1;
-  background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
-.stat .lab{font-size:15px;color:var(--muted);margin-top:8px;font-weight:600}
-.stat .det{font-size:13px;color:#8291ab;margin-top:4px}
-
-.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px}
-.fstep{position:relative;background:#fff;border:1.5px solid var(--line2);border-radius:14px;padding:13px 15px;
-  flex:1;min-width:120px;cursor:pointer;transition:.22s;box-shadow:var(--shadow-sm)}
-.fstep:hover{transform:translateY(-4px);border-color:var(--blue2);box-shadow:var(--shadow)}
-.fstep .n{font-size:11.5px;font-weight:800;color:var(--blue2);letter-spacing:.03em}
-.fstep .t{font-size:16px;font-weight:800;color:var(--navy);margin-top:2px}
-.fstep .d{font-size:12.5px;color:var(--muted);margin-top:2px}
-.fstep.hi{background:linear-gradient(160deg,#eaf1ff,#f7faff);border-color:#b9cdf7}
-.fstep.md{background:linear-gradient(160deg,#fff4e5,#fffaf2);border-color:#f0cf9a}
-.fstep.doc{background:linear-gradient(160deg,#e9f7ee,#f6fcf8);border-color:#a8d6b6}
-.fstep .arrow{position:absolute;right:-11px;top:50%;transform:translateY(-50%);color:var(--blue2);font-size:18px;font-weight:900;z-index:3}
-.fstep:last-child .arrow,.fstep.noarr .arrow{display:none}
-
-.slide.cover{background:
-  radial-gradient(90% 120% at 85% -10%,rgba(18,181,214,.28),transparent 55%),
-  radial-gradient(70% 90% at 0% 110%,rgba(47,99,230,.30),transparent 55%),
-  linear-gradient(140deg,#0a2160 0%,#0b2f86 45%,#123a9e 100%);
-  color:#fff;justify-content:center;padding:66px 78px}
-.cover .kick{align-self:flex-start;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);
-  color:#eaf1ff;font-weight:700;font-size:15px;padding:9px 18px;border-radius:30px;backdrop-filter:blur(4px)}
-.cover h1{font-size:62px;line-height:1.12;font-weight:800;margin:22px 0 14px;letter-spacing:-.02em;color:#fff}
-.cover h1 span{background:linear-gradient(120deg,#9fe4ff,#d7e5ff);-webkit-background-clip:text;background-clip:text;color:transparent}
-.cover .lead{font-size:20px;color:#cfdcf7;max-width:820px;line-height:1.55;font-weight:500}
-.cover .meta{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
-.cover .meta span{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);border-radius:12px;
-  padding:11px 17px;font-size:15px;font-weight:600;color:#eaf1ff;backdrop-filter:blur(4px)}
-.cover .steps{display:flex;gap:10px;margin-top:26px;flex-wrap:wrap}
-.cover .steps b{background:rgba(255,255,255,.16);border-radius:11px;padding:9px 15px;font-size:15px;font-weight:700;color:#fff}
-
-@keyframes qfade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-.quiz{width:100%;max-width:840px;margin:0 auto}
-.qtext{font-size:27px;font-weight:800;color:var(--navy);line-height:1.4;margin-bottom:24px}
-.opts{display:flex;flex-direction:column;gap:14px;margin-bottom:22px}
-.opt{display:flex;align-items:center;gap:15px;background:#fff;border:2px solid var(--line2);border-radius:14px;
-  padding:18px 22px;font-size:20px;font-weight:600;color:#2a3653;cursor:pointer;text-align:left;transition:.18s;box-shadow:var(--shadow-sm)}
-.opt:hover{border-color:var(--blue2);transform:translateY(-2px)}
-.opt .k{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;
-  background:var(--sky);color:var(--blue);font-weight:800;font-size:18px;flex:0 0 auto;transition:.18s}
-.opt.sel{border-color:var(--blue2);background:#f2f6ff}
-.opt.correct{border-color:var(--ok);background:#eefaf3}
-.opt.correct .k{background:var(--ok);color:#fff}
-.opt.correct::after{content:"✓ 정답";margin-left:auto;color:var(--ok);font-weight:800;font-size:16px}
-.opt.wrong{border-color:var(--bad);background:#fdf0f0}
-.opt.wrong .k{background:var(--bad);color:#fff}
-.opt.wrong::after{content:"✗";margin-left:auto;color:var(--bad);font-weight:800;font-size:18px}
-.reveal{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border:none;font-size:17px;font-weight:700;
-  padding:14px 30px;border-radius:13px;cursor:pointer;box-shadow:0 10px 22px -8px rgba(20,40,160,.5);transition:.18s}
-.reveal:hover{transform:translateY(-2px)}
-.qnext{background:#eef3fd;color:var(--blue);border:2px solid #cddcf5;font-size:16px;font-weight:700;
-  padding:12px 24px;border-radius:13px;cursor:pointer;transition:.18s}
-.qnext:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
-.ans{display:none;margin-top:22px;border-left:5px solid var(--ok);background:linear-gradient(90deg,#eefaf3,#fbfffc);
-  border-radius:0 14px 14px 0;padding:18px 22px;box-shadow:var(--shadow-sm)}
-.ans.show{display:block;animation:qfade .4s ease}
-.ans b{color:var(--ok);font-size:20px;display:block;margin-bottom:5px}
-.ans p{font-size:16px;color:#2a3653;line-height:1.55}
-.qprog{display:flex;gap:7px;margin-top:4px}
-.qprog span{width:26px;height:6px;border-radius:4px;background:var(--line2)}
-.qprog span.on{background:linear-gradient(90deg,var(--blue),var(--cyan))}
-.xlsbtn{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border:none;font-size:15px;font-weight:700;
-  padding:11px 22px;border-radius:12px;cursor:pointer;box-shadow:0 10px 22px -8px rgba(20,40,160,.5);transition:.18s}
-.xlsbtn:hover{transform:translateY(-2px)}
-#xlsmodal{position:fixed;inset:0;background:rgba(6,13,30,.9);z-index:80;display:none;align-items:center;justify-content:center;padding:30px 30px 40px;backdrop-filter:blur(5px)}
-#xlsmodal.show{display:flex}
-.xlsbox{background:#fff;border-radius:14px;box-shadow:0 30px 90px -20px rgba(0,0,0,.8);max-width:1120px;width:100%;max-height:86vh;overflow:auto;position:relative}
-.xtitle{background:linear-gradient(135deg,#1f4e79,#2a5a92);color:#fff;font-weight:800;font-size:15px;text-align:center;padding:12px 14px}
-.xclose{position:fixed;top:20px;right:34px;background:#fff;color:#1f3a63;border:none;font-size:14px;font-weight:800;padding:9px 15px;border-radius:10px;cursor:pointer;z-index:90;box-shadow:0 6px 18px -6px rgba(0,0,0,.5)}
-.xclose:hover{background:var(--bad);color:#fff}
-.xtab{border-collapse:collapse;width:100%;font-size:12.5px;font-family:"Pretendard","Malgun Gothic",sans-serif}
-.xtab th{background:#dbeafe;color:#1f3a63;border:1px solid #b7c9e3;padding:7px 9px;font-weight:700;text-align:center;position:sticky;top:0;z-index:2}
-.xtab td{border:1px solid #dce4f0;padding:5px 9px;color:#243b5c;white-space:nowrap;text-align:center}
-.xtab td:last-child{text-align:left;color:#5b6b86}
-.xtab tr:nth-child(odd) td{background:#f5f9fe}
-.xtab td.xr{background:#ffc7ce !important;color:#b00020;font-weight:800}
-#promptmodal{position:fixed;inset:0;background:rgba(6,13,30,.9);z-index:80;display:none;align-items:center;justify-content:center;padding:44px;backdrop-filter:blur(5px)}
-#promptmodal.show{display:flex}
-#promptmodal .prompt{max-width:660px;width:100%;box-shadow:0 30px 90px -20px rgba(0,0,0,.8)}
-.pmnote{font-size:13.5px;color:var(--muted);line-height:1.5}
-
-#hud{position:fixed;left:0;right:0;bottom:0;height:60px;display:flex;align-items:center;justify-content:space-between;
-  padding:0 26px;z-index:40}
-.brand{display:flex;align-items:center;gap:11px;color:#cbd8f2;font-weight:700;font-size:14px}
-.brand .logo{background:linear-gradient(135deg,#2f63e6,#12b5d6);color:#fff;font-size:12px;font-weight:800;
-  padding:6px 10px;border-radius:8px;letter-spacing:.05em}
-.ctrls{display:flex;align-items:center;gap:10px}
-.btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#eaf1ff;font-size:14px;font-weight:700;
-  padding:10px 18px;border-radius:11px;cursor:pointer;transition:.18s;backdrop-filter:blur(4px)}
-.btn:hover{background:var(--blue2);border-color:var(--blue2)}
-.btn.icon{padding:10px 13px}
-.btn:disabled{opacity:.4;cursor:default}
-.counter{color:#cbd8f2;font-size:13px;font-weight:700;min-width:56px;text-align:center}
-#dots{position:fixed;top:20px;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:40;max-width:90vw;flex-wrap:wrap;justify-content:center}
-.dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.28);cursor:pointer;transition:.2s;position:relative}
-.dot.on{background:linear-gradient(135deg,#4d86ff,#12b5d6);transform:scale(1.3)}
-.dot:hover::after{content:attr(data-t);position:absolute;top:18px;left:50%;transform:translateX(-50%);
-  white-space:nowrap;background:#0c1730;color:#dbe7ff;font-size:11px;font-weight:600;padding:5px 9px;border-radius:7px;z-index:5}
-
-#overview{position:fixed;inset:0;background:rgba(6,13,30,.92);z-index:60;display:none;
-  padding:40px 50px;overflow:auto;backdrop-filter:blur(6px)}
-#overview.show{display:block}
-#overview h3{color:#eaf1ff;font-size:22px;font-weight:800;margin-bottom:18px}
-.ovgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:15px}
-.ovcard{background:linear-gradient(160deg,#132a55,#0e1f42);border:1px solid rgba(255,255,255,.12);
-  border-radius:14px;padding:16px;cursor:pointer;transition:.2s;color:#dbe7ff;min-height:104px}
-.ovcard:hover{transform:translateY(-5px);border-color:var(--cyan);box-shadow:0 16px 40px -16px rgba(18,181,214,.6)}
-.ovcard .idx{font-size:12.5px;font-weight:800;color:#6ea0ff}
-.ovcard .ttl{font-size:15px;font-weight:700;margin-top:7px;line-height:1.35}
-.ovcard.on{border-color:var(--cyan);background:linear-gradient(160deg,#1a3f7a,#12305f)}
-
-#toast{position:fixed;top:52px;left:50%;transform:translateX(-50%);background:#0c1730;color:#dbe7ff;
-  font-size:13px;font-weight:600;padding:9px 16px;border-radius:10px;z-index:70;opacity:0;transition:.3s;pointer-events:none}
-#toast.show{opacity:1}
+  /* Admin table */
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);}
+  th{font-size:11px;color:var(--muted);font-weight:700;}
+  td .del{border:0;background:var(--red-soft);color:var(--red);border-radius:7px;padding:4px 9px;
+    font-size:12px;cursor:pointer;font-weight:600;}
+  .empty-msg{color:var(--muted);font-size:13px;padding:16px 0;text-align:center;}
+  .pill{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:6px;
+    padding:2px 7px;font-size:12px;font-weight:600;}
+  .badge{display:inline-flex;align-items:center;gap:5px;border-radius:6px;padding:3px 8px;font-size:12px;
+    font-weight:600;margin:3px 4px 0 0;cursor:pointer;}
+  .badge.b-nolec{background:var(--nolec-soft);color:var(--nolec);}
+  .badge.b-lv1{background:var(--lv1-soft);color:var(--lv1-ink);}
+  .badge.b-lv2{background:var(--lv2-soft);color:var(--lv2-ink);}
+  .badge.b-need{background:var(--need-soft);color:var(--need);}
+  .badge .x{opacity:.6;font-weight:700;}
 </style>
 </head>
 <body>
-<div id="viewport">
-  <div id="stage">
+<header>
+  <div>
+    <h1>아르바이트 지원 달력</h1>
+    <div class="sub">2026년 6월 ~ 2027년 1월 · 주말·공휴일은 빨간색으로 표시됩니다</div>
+    <div class="sub" id="todayChip" style="color:var(--accent);font-weight:700;margin-top:3px"></div>
+  </div>
+  <div class="modes">
+    <button id="mUser" class="active" onclick="setMode('user')">지원자</button>
+    <button id="mAdmin" onclick="setMode('admin')">관리자</button>
+  </div>
+</header>
 
-  <!-- 0 COVER -->
-  <section class="slide cover active">
-    <span class="kick r">삼성중공업 · 클로드(Claude) 기본교육 · 레벨 1 · 온라인</span>
-    <h1 class="r">Chat 1 실습<br><span>엑셀 데이터로 검토 보고서 만들기</span></h1>
-    <p class="lead r" style="max-width:none;white-space:nowrap;font-size:18px">블록 공정현황 엑셀을 첨부해 <b style="color:#fff">인식 → 검증 → 분석 → 인사이트 → 보고서(DOCX)</b>까지, 클로드와 함께 완성합니다.</p>
-    <div class="meta r">
-      <span>🧩 난이도 입문</span>
-      <span>📎 Chat1_공정현황엑셀.xlsx</span><span>🎯 공정현황_데이터검토_보고서.docx</span>
+<div class="wrap">
+  <!-- Calendar -->
+  <div class="card">
+    <h2 id="calTitle">날짜를 선택해 지원하기</h2>
+    <div id="cal" class="cal-scroll"></div>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--red-soft);border-color:#f3c9cb"></i>주말·공휴일</span>
+      <span><i class="sw" style="background:var(--lv1-soft);border-color:#e6d488"></i>레벨1 강의</span>
+      <span><i class="sw" style="background:var(--lv2-soft);border-color:#a9c6f5"></i>레벨2 강의</span>
+      <span><i class="sw" style="background:var(--need-soft)"></i>필요 인원(지원/필요)</span>
+      <span><i class="sw" style="background:var(--nolec-soft)"></i>강의 없는 날</span>
+      <span><i class="sw" style="background:var(--range)"></i>선택 범위</span>
+      <span><i class="sw" style="background:var(--green)"></i>지원자 있는 날(관리자)</span>
     </div>
-    <div class="steps r">
-      <b>학습목표</b><b>챗의 장점</b><b>전체 흐름</b><b>실습 준비</b><b>인식→보고서</b><b>점검·확장</b>
-    </div>
-  </section>
+  </div>
 
-  <!-- 1 학습목표 -->
-  <section class="slide">
-    <span class="eyebrow r">LEARNING GOALS</span>
-    <div class="head r"><span class="num">🎯</span><h2>학습 목표</h2></div>
-    <p class="sub r">이 강의를 마치면 다음을 <strong>스스로</strong> 할 수 있습니다.</p>
-    <div class="grid g2 r" style="margin-bottom:16px">
-      <div class="card"><h3><span class="numdot">1</span>데이터 인식시키기</h3><p>엑셀을 클로드에 첨부해 <strong>시트·컬럼 구조를 먼저 인식</strong>시킬 수 있다.</p></div>
-      <div class="card"><h3><span class="numdot">2</span>품질 검증하기</h3><p>누락·형식 오류·상태 불일치 등 <strong>데이터 품질 문제를 찾아낼</strong> 수 있다.</p></div>
-      <div class="card"><h3><span class="numdot">3</span>분석·인사이트 도출</h3><p>내 <strong>업무 기준을 반영</strong>해 분석하고 조치 인사이트를 뽑을 수 있다.</p></div>
-      <div class="card"><h3><span class="numdot">4</span>보고서로 정리</h3><p>결과를 <strong>MD → Word 보고서(DOCX)</strong>로 정리할 수 있다.</p></div>
+  <!-- Side panel -->
+  <div class="side">
+    <!-- USER: apply -->
+    <div id="applyCard" class="card">
+      <h2>아르바이트 지원</h2>
+      <div class="range-box">
+        시작일: <b id="selStart">—</b><br>
+        종료일: <b id="selEnd">—</b>
+      </div>
+      <div class="field">
+        <label>이름</label>
+        <input type="text" id="applName" placeholder="이름을 입력하세요" maxlength="20">
+      </div>
+      <button class="btn" id="applyBtn" onclick="submitApplication()">지원하기</button>
+      <button class="btn ghost" style="margin-top:8px" onclick="clearSelection()">선택 초기화</button>
+      <p class="hint" style="margin-top:12px">달력에서 <b>시작일</b>을 누르고 이어서 <b>종료일</b>을 누르세요. 하루만 근무하면 같은 날을 한 번만 누르면 됩니다.</p>
     </div>
-    <div class="danger r"><b>⚠ 무엇보다 먼저 — 클로드도 틀릴 수 있습니다</b><p>클로드는 강력한 보조자이지만 <strong>완벽하지 않습니다.</strong> 건수·판정·완료 여부 등 핵심 숫자는 <strong>반드시 사람이 원본과 대조해 최종 검증</strong>합니다. <br>확인되지 않은 내용은 항상 <strong>[확인필요]</strong>로 남깁니다.</p></div>
-  </section>
 
-  <!-- 2 챗 장점 -->
-  <section class="slide">
-    <span class="eyebrow r">1 · WHY CHAT</span>
-    <div class="head r"><span class="num">1</span><h2>챗(Chat)을 쓰면 무엇이 좋은가</h2></div>
-    <p class="sub r">"엑셀을 열고 눈으로 훑는" 기존 방식과 무엇이 다른지부터 짚습니다.</p>
-    <div class="grid g2 r" style="margin-bottom:18px">
-      <div class="card"><h3><span class="ico">💬</span>말로 시키면 된다</h3><p>코딩을 몰라도 "이 데이터 이상한 곳 찾아줘"처럼 <strong>평소 쓰는 말</strong>로 지시합니다.<br>진입장벽이 없습니다.</p></div>
-      <div class="card"><h3><span class="ico">📎</span>파일을 그대로 첨부</h3><p>엑셀을 통째로 올리면 시트·컬럼 구조를 <strong>스스로 인식</strong>합니다. <br>옮겨 붙일 필요가 없습니다.</p></div>
-      <div class="card"><h3><span class="ico">🔁</span>대화로 이어서 다듬기</h3><p>한 번에 끝내지 않아도 됩니다. <br><strong>이전 답을 기억</strong>하므로 "기준을 이렇게 바꿔줘"로 계속 발전시킵니다.</p></div>
-      <div class="card"><h3><span class="ico">📄</span>여러 결과물로 변환</h3><p>같은 내용을 <strong>MD · Word · PPT · Excel · 대시보드</strong>로 바꿔 냅니다. <br>상황에 맞게 재활용합니다.</p></div>
+    <!-- ADMIN: login -->
+    <div id="loginCard" class="card" style="display:none">
+      <h2>관리자 로그인</h2>
+      <div class="field">
+        <label>아이디</label>
+        <input type="text" id="admId" placeholder="아이디를 입력하세요" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>비밀번호</label>
+        <input type="password" id="admPw" placeholder="비밀번호를 입력하세요" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="btn" onclick="doLogin()">로그인</button>
     </div>
-    <div class="why r"><b>핵심 한 줄</b><p>챗은 <strong>"엑셀을 대신 읽고, 검토하고, 보고서로 정리해 주는 실무 보조자"</strong>입니다. 오늘은 그 흐름을 직접 손으로 따라 해 봅니다.</p></div>
-  </section>
 
-  <!-- 3 전체 흐름 -->
-  <section class="slide">
-    <span class="eyebrow r">2 · TODAY'S FLOW</span>
-    <div class="head r"><span class="num">2</span><h2>오늘 실습의 전체 흐름</h2></div>
-    <p class="sub r">단계를 눌러 바로 이동할 수 있습니다. 엑셀 첨부에서 보고서까지 한눈에.</p>
-    <div class="flow r" style="margin-bottom:14px">
-      <div class="fstep noarr"><span class="n">첨부</span><div class="t">엑셀 업로드</div><div class="d">공정현황 xlsx</div><span class="arrow">›</span></div>
-      <div class="fstep hi" data-goto="6"><span class="n">STEP 1</span><div class="t">데이터 인식</div><div class="d">구조 파악</div><span class="arrow">›</span></div>
-      <div class="fstep hi" data-goto="11"><span class="n">STEP 2</span><div class="t">데이터 검증</div><div class="d">품질 점검</div><span class="arrow">›</span></div>
-      <div class="fstep" data-goto="13"><span class="n">사이</span><div class="t">확인 질문</div><div class="d">기준 확정</div><span class="arrow">›</span></div>
-    </div>
-    <div class="flow r" style="margin-bottom:14px">
-      <div class="fstep" data-goto="14"><span class="n">STEP 3</span><div class="t">데이터 분석</div><div class="d">현황·패턴</div><span class="arrow">›</span></div>
-      <div class="fstep" data-goto="17"><span class="n">STEP 4</span><div class="t">인사이트 도출</div><div class="d">조치 결정</div><span class="arrow">›</span></div>
-      <div class="fstep md" data-goto="20"><span class="n">저장</span><div class="t">데이터분석.md</div><div class="d">사실 근거</div><span class="arrow">›</span></div>
-      <div class="fstep md" data-goto="20"><span class="n">저장</span><div class="t">인사이트.md</div><div class="d">해석·조치</div><span class="arrow">›</span></div>
-    </div>
-    <div class="flow r" style="margin-bottom:16px">
-      <div class="fstep doc" data-goto="19"><span class="n">STEP 5</span><div class="t">보고서 DOCX</div><div class="d">현업 보고용</div><span class="arrow">›</span></div>
-      <div class="fstep" data-goto="25"><span class="n">확장</span><div class="t">PPT · PDF</div><div class="d">발표·배포</div><span class="arrow">›</span></div>
-      <div class="fstep noarr" data-goto="25"><span class="n">확장</span><div class="t">Excel · 대시보드</div><div class="d">공유·모니터링</div><span class="arrow">›</span></div>
-    </div>
-    <div class="warn r"><b>⚠ 반드시 기억할 지점</b><p style="font-size:15.5px;color:#5a4a2a">STEP 1·2 직후에는 <strong>사람이 직접 표시된 엑셀을 확인·수정</strong>하는 단계가 들어갑니다. <br>클로드가 짚어준 이상 항목을 담당자가 눈으로 정정한 뒤 다음 단계로 넘어가야 결과를 신뢰할 수 있습니다.</p></div>
-  </section>
+    <!-- ADMIN: day settings -->
+    <div id="setCard" class="card" style="display:none">
+      <h2>날짜 설정</h2>
+      <p class="hint">아래에서 지정할 종류를 고른 뒤, 달력의 날짜를 클릭하세요.</p>
+      <div class="brush" id="brush" style="margin-top:10px">
+        <button data-b="lv1">레벨1 강의</button>
+        <button data-b="lv2">레벨2 강의</button>
+        <button data-b="need">필요 인원</button>
+        <button data-b="nolec">강의 없는 날</button>
+        <button data-b="clear">지정 해제</button>
+      </div>
+      <div class="hours" id="hoursRow">
+        <span class="lab">강의 시간</span>
+        <button data-h="6">6시간</button>
+        <button data-h="8">8시간</button>
+      </div>
+      <div class="hours" id="needRow" style="display:none">
+        <span class="lab">필요 인원</span>
+        <input type="number" id="needCount" min="0" max="99" value="1"
+          style="width:72px;padding:7px 10px;border:1px solid var(--line);border-radius:9px;font-size:14px;font-family:inherit;outline:none">
+        <span class="lab">명 → 날짜 클릭</span>
+      </div>
 
-  <!-- 4 데이터 -->
-  <section class="slide">
-    <span class="eyebrow r">3 · THE DATA</span>
-    <div class="head r"><span class="num">3</span><h2>오늘 다룰 엑셀 데이터</h2></div>
-    <p class="sub r">조선소 <strong>블록 공정현황</strong> 샘플입니다. 실습을 위해 <strong>일부러 '이상한 값'</strong>이 섞여 있습니다.</p>
-    <div class="grid g4 r" style="margin-bottom:16px">
-      <div class="stat"><div class="big" data-count="30">0</div><div class="lab">데이터 행</div><div class="det">블록 8개 × 공정</div></div>
-      <div class="stat"><div class="big" data-count="3">0</div><div class="lab">시트</div><div class="det">현황·검증기준·프롬프트</div></div>
-      <div class="stat"><div class="big" data-count="10">0</div><div class="lab">컬럼</div><div class="det">블록·공정·진척률 등</div></div>
-      <div class="stat"><div class="big" data-count="19">0</div><div class="lab">이상 의심 행</div><div class="det">전체 30건 중</div></div>
+      <h3>지정된 강의일</h3>
+      <div id="lecList"><p class="hint">아직 없습니다.</p></div>
+      <h3>필요 인원 지정일</h3>
+      <div id="needList"><p class="hint">아직 없습니다.</p></div>
+      <h3>강의 없는 날</h3>
+      <div id="nolecList"><p class="hint">아직 없습니다.</p></div>
     </div>
-    <div class="cols r" style="grid-template-columns:1.35fr 1fr;flex:none">
-      <div>
-        <h4 style="color:var(--navy);font-size:15px;margin-bottom:6px;font-weight:700">데이터 미리보기 (일부)</h4>
-        <table class="mini">
-          <tr><th>블록</th><th>공정</th><th>계획일</th><th>실적일</th><th>진척률</th><th>담당자</th><th>상태</th></tr>
-          <tr><td>B-101</td><td>절단</td><td>2026-07-01</td><td>2026-07-01</td><td>100%</td><td>김민수</td><td>완료</td></tr>
-          <tr><td>B-101</td><td>조립</td><td>2026-07-05</td><td class="b-bad">(빈칸)</td><td>60%</td><td class="b-bad">(빈칸)</td><td>진행</td></tr>
-          <tr><td>B-101</td><td>검사</td><td class="b-warn">2026.07.10</td><td>(빈칸)</td><td class="b-bad">0.8</td><td>최은지</td><td>대기</td></tr>
-          <tr><td>B-102</td><td>조립</td><td>2026-07-08</td><td>2026-07-10</td><td class="b-bad">120%</td><td>박지훈</td><td>완료</td></tr>
-          <tr><td>B-102</td><td>도장</td><td class="b-warn">7/15</td><td>(빈칸)</td><td>30%</td><td>김민수</td><td>진행</td></tr>
-        </table>
-      </div>
-      <div class="warn"><b>👀 심어둔 이상값</b>
-        <ul>
-          <li>실적일·담당자 <strong>빈칸</strong></li>
-          <li>진척률 <strong>120%·110%</strong>(100% 초과)</li>
-          <li>진척률 <strong>0.8 · "--" · 빈칸</strong> 형식 혼재</li>
-          <li>날짜 <strong>2026.07.10 · 7/15</strong> 혼재</li>
-          <li>상태 <strong>'완료'</strong>인데 실적일 없음</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <!-- 5 실습 준비 STEP 0 -->
-  <section class="slide">
-    <span class="eyebrow r">STEP 0 · READY</span>
-    <div class="head r"><span class="num">0</span><h2>실습 준비 — 시작 전에</h2></div>
-    <p class="sub r">처음이어도 괜찮습니다. 아래 순서대로 준비하면 바로 실습할 수 있습니다.</p>
-    <div class="grid g4 r" style="margin-bottom:16px">
-      <div class="card"><h3><span class="numdot">1</span>접속</h3><p>회사가 <strong>승인한 클로드</strong>에 로그인합니다.</p></div>
-      <div class="card"><h3><span class="numdot">2</span>새 채팅</h3><p><strong>새 대화</strong>를 엽니다. 실습마다 새로 시작하는 습관.</p></div>
-      <div class="card"><h3><span class="numdot">3</span>파일 첨부</h3><p>입력창의 <strong>📎(첨부)</strong>로 오늘의 엑셀을 올립니다.</p></div>
-      <div class="card"><h3><span class="numdot">4</span>프롬프트 붙여넣기</h3><p>각 STEP의 <strong>복사 프롬프트</strong>를 붙여넣고 전송합니다.</p></div>
-    </div>
-    <div class="danger r"><b>🔒 보안 — 실습 전 필수 확인</b><p>실습은 <strong>제공된 샘플 파일로만</strong> 진행합니다. 사내 기밀·설계도면·고객·인사 정보 등 <strong>실제 업무 데이터는 업로드하지 않습니다.<br></strong> 반드시 <strong>회사가 승인한 도구·계정</strong>만 사용하고, 보안 지침이 우선합니다.</p></div>
-  </section>
-
-  <!-- 6 STEP1 인식 -->
-  <section class="slide">
-    <span class="eyebrow r">STEP 1 · RECOGNIZE</span>
-    <div class="head r"><span class="num">4</span><h2>데이터 인식 — 바로 분석 말고, 구조부터</h2></div>
-    <p class="sub r">새 채팅에 오늘의 엑셀을 첨부한 뒤, 아래 프롬프트를 그대로 붙여넣습니다.</p>
-    <div class="cols r" style="grid-template-columns:1fr 1fr">
-      <div class="prompt"><button class="copy" onclick="cp(this)">복사</button><span class="lbl">복사용 프롬프트</span>
-<pre>첨부한 엑셀 데이터를 바로 분석하지 말고,
-먼저 데이터 구조를 인식해줘.
-다음 항목을 확인해줘.
-1. 이 엑셀이 어떤 업무 데이터로 보이는지
-2. 포함된 시트 목록
-3. 각 시트의 역할 추정
-4. 주요 컬럼명
-5. 각 컬럼의 의미
-6. 행 단위 데이터가 무엇을 의미하는지
-7. 이 데이터로 분석할 수 있는 내용
-8. 분석 전에 추가로 확인해야 할 내용
-askuserquestion이 필요하면 활용해줘</pre></div>
-      <div class="example">
-        <span class="tag">✔ 클로드 예시 답변</span>
-        <p><strong>데이터:</strong> 조선소 <strong>블록별 공정 진행현황</strong> 관리표.</p>
-        <p><strong>시트 3개:</strong> 공정현황_샘플 · 검증기준 · 실습프롬프트</p>
-        <p><strong>행 의미:</strong> "블록 × 공정" 1건의 진행 상태</p>
-        <p><strong>분석 가능:</strong> 지연·진척률 이상·담당자 누락·상태 정합성</p>
-        <h4>먼저 확인이 필요한 3가지</h4>
-        <ul><li>진척률 100% 초과는 오류? 재작업?</li><li>실적일 빈칸=미완료로 봐도 되나?</li><li>날짜 형식 표준(yyyy-mm-dd)?</li></ul>
-      </div>
-    </div>
-    <div class="why r" style="margin-top:16px"><b>❓ 왜 인식부터 하나요</b><p>바로 분석시키면 <strong>데이터를 오해한 채</strong> 그럴듯한 답을 냅니다. "너는 이 데이터를 어떻게 이해했니"를 먼저 확인하면 오해를 초반에 바로잡습니다.</p></div>
-  </section>
-
-  <!-- 인식 결과 -->
-  <section class="slide">
-    <span class="eyebrow r">STEP 1 · 인식 결과</span>
-    <div class="head r"><span class="num">✓</span><h2>데이터 인식 결과 — 컬럼과 분석 포인트</h2></div>
-    <p class="sub r">각 컬럼의 의미, 이 데이터로 할 수 있는 것, 그리고 분석 전 주의할 점입니다.</p>
-    <div class="cols r" style="grid-template-columns:1fr 1fr">
-      <div>
-        <h4 style="color:var(--navy);font-size:15px;margin-bottom:7px;font-weight:700">④ · ⑤ 주요 컬럼과 의미 <span style="color:var(--muted);font-weight:500">(공정현황_샘플)</span></h4>
-        <table class="mini">
-          <tr><th>컬럼</th><th>의미</th></tr>
-          <tr><td>블록</td><td>블록 식별번호 (B-101 등)</td></tr>
-          <tr><td>선종</td><td>선박 종류 (LNG / CONTAINER / TANKER)</td></tr>
-          <tr><td>공정</td><td>작업 단계 (절단→조립→용접→검사/도장)</td></tr>
-          <tr><td>계획일</td><td>계획된 완료(기준)일 — 단일 날짜</td></tr>
-          <tr><td>실적일</td><td>실제 완료일 — <span class="b-bad">비어 있는 행 다수</span></td></tr>
-          <tr><td>진척률</td><td>진행률 — <span class="b-warn">형식 혼재(100%,0.8,--,빈칸,120%)</span></td></tr>
-          <tr><td>담당자</td><td>작업 책임자 — <span class="b-bad">일부 공란</span></td></tr>
-          <tr><td>작업구역</td><td>물리적 구역 코드 (A-01 등)</td></tr>
-          <tr><td>상태</td><td>완료 / 진행 / 대기</td></tr>
-          <tr><td>비고</td><td>특이사항 메모</td></tr>
-        </table>
-      </div>
-      <div>
-        <div class="card" style="margin-bottom:12px"><h3><span class="ico">📏</span>⑥ 행 단위의 의미</h3><p>한 행 = <strong>특정 블록의 한 공정 단계</strong>. 블록 1개가 절단·조립·용접·검사(도장) 등 여러 행으로 나뉘어 <strong>8블록 × 3~4공정 ≈ 30행</strong>.</p></div>
-        <div class="card" style="margin-bottom:12px"><h3><span class="ico">📊</span>⑦ 분석 가능한 것</h3><p>계획 대비 지연 · 진척률 이상값 · 결측(실적일·담당자·진척률) · 날짜 형식 혼재 · 상태-실적 불일치 · 선종/공정/담당자별 집계.</p></div>
-        <div class="danger"><b>⑧ 분석 전 주의 신호</b><p>비고 컬럼이 이미 오류 유형을 라벨링(예: "진척률 100% 초과")해 뒀습니다. 그대로 베끼면 '스스로 판정'이 아니라 <strong>정답 복사</strong>가 됩니다. 비고는 참고만 하고 <strong>원본 값에서 다시 판정</strong>하세요.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 클로드의 3가지 질문 -->
-  <section class="slide">
-    <span class="eyebrow r">STEP 1 · ASK BACK · 확인 질문</span>
-    <div class="head r"><span class="num">?</span><h2>클로드가 먼저 물어본 3가지</h2></div>
-    <p class="sub r">인식·검증에서 애매한 부분을, 분석에 들어가기 전에 클로드가 <strong>관리자에게 되물었습니다.</strong></p>
-    <div class="grid g3 r" style="margin-bottom:14px">
-      <div class="card">
-        <h3><span class="numdot">1</span>진척률 형식 오류</h3>
-        <p style="font-size:15px">진척률 <strong>0.8(소수)·'--'·빈칸</strong>은 '형식 오류'인데, <strong>지연·이상값 계산 시</strong> 어떻게 처리할까요?</p>
-        <p style="font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.6">① 형식오류 표시·계산 제외<br>② 0.8→80% 환산, --·빈칸만 제외<br>③ 전부 [확인필요]로 남김</p>
-      </div>
-      <div class="card">
-        <h3><span class="numdot">2</span>날짜 형식 혼재</h3>
-        <p style="font-size:15px">날짜가 혼재된 값(<strong>7/15 · 2026.07.10 · 2026/07/16</strong>)은 <strong>지연 판정</strong>에 어떻게 쓸까요?</p>
-        <p style="font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.6">① 표준화 후 지연 계산에 사용<br>② 형식오류 분류, 지연은 [확인필요]</p>
-      </div>
-      <div class="card">
-        <h3><span class="numdot">3</span>상태 불일치</h3>
-        <p style="font-size:15px"><strong>상태</strong>와 실적일/진척률이 어긋날 때(완료인데 실적일 없음) <strong>어느 쪽을 우선</strong>할까요?</p>
-        <p style="font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.6">① 실적일·진척률 기준 우선<br>② 상태 컬럼 기준 우선<br>③ 둘 다 불일치로 [확인필요]</p>
-      </div>
-    </div>
-    <div class="example r" style="border-color:#c6d6f5;background:linear-gradient(180deg,#f2f6ff,#fbfcff)">
-      <span class="tag" style="background:linear-gradient(135deg,var(--blue),var(--blue2))">✍ 관리자 답변 — 세 질문 공통</span>
-      <p style="font-size:16px">"엑셀에 <strong>문제 셀을 빨간색으로 표시</strong>해줘 — 판정은 하지 말고, <strong>내가 직접 수정</strong>하겠다."</p>
-    </div>
-    <p class="r" style="font-size:13.5px;color:var(--muted);margin-top:10px;text-align:center">→ 클로드는 <strong>기준을 멋대로 정하지 않고</strong>, 관리자의 답변대로 대상 셀만 표시합니다. (판단 주도권 = 사람)</p>
-  </section>
-
-  <!-- 검토 표시 결과 -->
-  <section class="slide">
-    <span class="eyebrow r">STEP 1 · 검토 표시 결과</span>
-    <div class="head r"><span class="num">🟥</span><h2>관리자 답변대로 — 문제 셀만 표시</h2></div>
-    <p class="sub r">클로드는 판정을 대신하지 않고, 세 유형의 <strong>문제 셀 8칸만 빨간색으로 표시</strong>했습니다. 실제 수정은 사람이 합니다.</p>
-    <div class="cols r" style="grid-template-columns:.92fr 1.08fr">
-      <div class="example" style="border-color:#c6d6f5;background:linear-gradient(180deg,#f2f6ff,#fbfcff)">
-        <span class="tag" style="background:linear-gradient(135deg,var(--blue),var(--blue2))">✍ 관리자 결정</span>
-        <p style="font-size:15.5px">"문제 셀을 <strong>빨간색으로 표시</strong>해줘 — 내가 <strong>직접 수정</strong>하겠다."</p>
-        <div class="why" style="margin-top:12px;box-shadow:none"><b>왜 이렇게?</b><p style="font-size:14.5px">AI가 값을 임의로 바꾸면 위험합니다. <strong>표시는 AI, 수정은 사람</strong> — 인간 검토(Human-in-the-loop)를 지킵니다.</p></div>
-        <button class="xlsbtn" style="margin-top:14px;width:100%" onclick="openXls()">📊 표시된 엑셀 확인</button>
-      </div>
-      <div>
-        <h4 style="color:var(--navy);font-size:15px;margin-bottom:7px;font-weight:700">🟥 검토 표시 결과 <span style="color:var(--muted);font-weight:500">(빨간 배경 = 직접 수정 대상 · 총 8칸)</span></h4>
-        <table>
-          <tr><th>표시 유형</th><th>위치</th><th>내용</th></tr>
-          <tr><td class="b-bad">진척률 형식 오류</td><td>F6·F9·F18</td><td>0.8 · '--' · 빈칸</td></tr>
-          <tr><td class="b-bad">날짜 형식 혼재</td><td>D6·D10·D18</td><td>2026.07.10 · 7/15 · 2026/07/16</td></tr>
-          <tr><td class="b-bad">상태 불일치</td><td>E13·I13</td><td>완료인데 실적일 없음(B-103 용접)</td></tr>
-        </table>
-        <div class="warn" style="margin-top:12px"><b>이번엔 표시 안 함 (요청 3종 외)</b><p style="font-size:14.5px;color:#5a4a2a">지연 · 진척률 100% 초과 · 담당자/실적일 누락은 <strong>[확인필요]</strong>로 남기고, 검증 단계에서 별도 정리합니다.</p></div>
-      </div>
-    </div>
-    <p class="r" style="font-size:13.5px;color:var(--muted);margin-top:10px;text-align:center">결과 파일 <strong>Chat1_공정현황엑셀_검토표시.xlsx</strong> — 표시된 셀은 <strong>관리자가 직접 확인·수정</strong>한 뒤 다음 단계로 넘어갑니다.</p>
-  </section>
-
-  <!-- 수정본 재업로드 · 인식 반복 -->
-  <section class="slide">
-    <span class="eyebrow r">STEP 1 · RE-CHECK · 수정 후 재확인</span>
-    <div class="head r"><span class="num">↻</span><h2>수정본을 다시 올려 — 인식 반복</h2></div>
-    <p class="sub r">관리자가 빨간 셀을 고친 뒤, <strong>수정본을 다시 첨부해 인식을 한 번 더</strong> 돌립니다. 깨끗해졌는지 확인하고 다음 단계로.</p>
-    <div class="flow r" style="margin-bottom:18px">
-      <div class="fstep" style="cursor:default"><span class="n">①</span><div class="t">빨간 셀 수정</div><div class="d">관리자 직접</div><span class="arrow">›</span></div>
-      <div class="fstep" style="cursor:default"><span class="n">②</span><div class="t">수정본 저장</div><div class="d">새 파일로</div><span class="arrow">›</span></div>
-      <div class="fstep hi" style="cursor:default"><span class="n">③</span><div class="t">다시 첨부</div><div class="d">이어서/새 채팅</div><span class="arrow">›</span></div>
-      <div class="fstep hi" style="cursor:default"><span class="n">④</span><div class="t">인식 반복</div><div class="d">STEP 1 재실행</div><span class="arrow">›</span></div>
-      <div class="fstep doc noarr" style="cursor:default"><span class="n">✓</span><div class="t">깨끗해지면</div><div class="d">검증·분석으로</div><span class="arrow">›</span></div>
-    </div>
-    <div class="cols r" style="grid-template-columns:1fr 1fr">
-      <div>
-        <div class="prompt"><button class="copy" onclick="cp(this)">복사</button><span class="lbl">복사용 프롬프트 (재인식용)</span>
-<pre>수정한 파일을 다시 첨부했어.
-앞서 빨간색으로 표시했던 문제 셀들이
-해소됐는지 인식 관점에서 다시 확인해줘.
-
-1. 남아 있는 형식 오류·결측·불일치가 있는지
-2. 이번에 추가로 확인할 점이 있는지
-아직 문제가 있으면 다시 표시해줘.</pre></div>
-        <div style="display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap">
-          <button class="xlsbtn" style="font-size:14px;padding:10px 18px" onclick="openPmt()">📋 기존 프롬프트 확인</button>
-          <span class="pmnote">앞 <strong style="color:var(--navy)">STEP 1의 인식 프롬프트</strong>를 그대로 써도 되고, 이 프롬프트를 써도 됩니다.</span>
-        </div>
-      </div>
-      <div>
-        <div class="example" style="margin-bottom:12px">
-          <span class="tag">✔ 클로드 예시 답변</span>
-          <p style="font-size:15px">표시했던 <strong>8개 셀이 모두 정정</strong>된 것을 확인했습니다. 날짜는 <strong>yyyy-mm-dd로 통일</strong>, 진척률 형식·상태 불일치도 해소됐습니다.</p>
-          <p style="font-size:15px;margin-top:6px">남은 <strong>지연·담당자 누락</strong> 등은 검증 단계에서 별도로 다룹니다. <span class="chip" style="font-size:11px">[확인필요]</span></p>
-        </div>
-        <div class="why"><b>❓ 왜 다시 인식하나요</b><p style="font-size:14.5px">사람이 고친 결과가 맞는지 <strong>AI로 교차 확인</strong>합니다. 문제가 남으면 표시→수정을 반복하고, <strong>깨끗해진 것을 확인한 뒤에만</strong> 검증·분석으로 넘어갑니다.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 7 STEP2 검증 -->
-  <section class="slide">
-    <span class="eyebrow r">STEP 2 · VALIDATE</span>
-    <div class="head r"><span class="num">5</span><h2>데이터 검증 — 업무 판단 전, 품질부터</h2></div>
-    <p class="sub r">공정 판단은 아직. 어떤 엑셀에나 통하는 <strong>공통 품질 문제</strong>를 먼저 찾습니다.</p>
-    <div class="cols r" style="grid-template-columns:.85fr 1.15fr">
-      <div class="prompt"><button class="copy" onclick="cp(this)">복사</button><span class="lbl">복사용 프롬프트</span>
-<pre>특정 업무 기준을 적용하기 전에,
-모든 엑셀 데이터에서 확인해야 하는
-품질 문제를 먼저 찾아줘.
-다음 기준으로 검증해줘.
-1. 빈 값 또는 누락값
-2. 중복 데이터
-3. 날짜 형식 불일치
-4. 숫자 형식 오류
-5. 텍스트 표기 불일치
-6. 비정상적으로 큰 값 또는 작은 값
-7. 계산 결과가 맞지 않아 보이는 값
-8. 같은 의미인데 다르게 입력된 값
-9. 필수 컬럼으로 보이지만 값이 비어 있는 항목
-10. 상태값과 실제 데이터가 맞지 않아 보이는 항목
-11. 분석에 방해가 되는 특수문자 또는 불명확한 값
-12. 추가 확인이 필요한 모호한 항목
-askuserquestion이 필요하면 활용해줘</pre></div>
-      <div>
-        <div class="example" style="margin-bottom:14px">
-          <span class="tag">✔ 클로드 예시 — 검증 결과표</span>
-          <table>
-            <tr><th>검증 항목</th><th>건수</th><th>판정</th></tr>
-            <tr><td>실적일 누락(상태≠대기)</td><td>9건</td><td class="b-bad">확인필요</td></tr>
-            <tr><td>담당자 누락</td><td>4건</td><td class="b-bad">확인필요</td></tr>
-            <tr><td>진척률 100% 초과</td><td>2건</td><td class="b-bad">이상값</td></tr>
-            <tr><td>진척률 형식 오류(0.8·--·빈칸)</td><td>3건</td><td class="b-warn">정정필요</td></tr>
-            <tr><td>날짜 형식 혼재</td><td>3건</td><td class="b-warn">표준화</td></tr>
-            <tr><td>상태-실적 불일치(B-103 용접)</td><td>1건</td><td class="b-bad">확인필요</td></tr>
-          </table>
-        </div>
-        <div class="why"><b>❓ 왜 품질 검증부터</b><p>지저분한 데이터 위 분석은 <strong>"쓰레기를 넣으면 쓰레기가 나옵니다"</strong>. 빈칸·형식오류·불일치를 먼저 걸러야 이후 숫자를 믿을 수 있습니다. → 담당자가 표시된 셀을 직접 정정하고 다음 단계로.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 검증 결과 -->
-  <section class="slide">
-    <span class="eyebrow r">STEP 2 · RESULT · 검증 결과</span>
-    <div class="head r"><span class="num">✓</span><h2>데이터 검증 결과 — 12기준 점검</h2></div>
-    <p class="sub r">12개 품질 기준으로 점검한 결과입니다. <strong>날짜 셀 속성 혼재</strong>와 <strong>상태-값 불일치</strong>가 핵심 이슈입니다.</p>
-    <div class="cols r" style="grid-template-columns:.82fr 1.18fr">
-      <div>
-        <h4 style="color:var(--navy);font-size:15px;margin-bottom:7px;font-weight:700">기준별 판정 (12)</h4>
-        <table class="mini">
-          <tr><th>기준</th><th>판정</th></tr>
-          <tr><td>1 빈값·누락</td><td class="b-warn">담당자 4건 결측</td></tr>
-          <tr><td>2 중복</td><td class="b-ok">없음</td></tr>
-          <tr><td>3 날짜 형식 ⚠</td><td class="b-bad">텍스트 23건 혼재</td></tr>
-          <tr><td>4 숫자 형식</td><td class="b-warn">진척률 소수 3건</td></tr>
-          <tr><td>5 텍스트 표기</td><td class="b-ok">일관</td></tr>
-          <tr><td>6 이상값</td><td class="b-warn">진척률 초과 2건</td></tr>
-          <tr><td>7 계산 오류</td><td>계산컬럼 없음·행8 메모누락</td></tr>
-          <tr><td>8 같은뜻 다른입력</td><td>3·4번과 동일</td></tr>
-          <tr><td>9 필수 결측</td><td class="b-warn">담당자 4건</td></tr>
-          <tr><td>10 상태-값 불일치 ⚠</td><td class="b-bad">7건 → 우측</td></tr>
-          <tr><td>11 특수문자</td><td class="b-ok">없음</td></tr>
-          <tr><td>12 모호 항목</td><td class="b-warn">소수·대기 진척률</td></tr>
-        </table>
-      </div>
-      <div>
-        <h4 style="color:var(--navy);font-size:15px;margin-bottom:7px;font-weight:700">⚠ 상태-값 불일치 7건 <span style="color:var(--muted);font-weight:500">(담당자 확인 필요)</span></h4>
-        <table class="mini">
-          <tr><th>행</th><th>블록·공정</th><th>상태</th><th>진척률</th><th>문제</th></tr>
-          <tr><td>6</td><td>B-101 검사</td><td>대기</td><td class="b-bad">0.8</td><td>80%인데 대기?</td></tr>
-          <tr><td>18</td><td>B-104 도장</td><td>대기</td><td class="b-bad">0.4</td><td>40%인데 대기?</td></tr>
-          <tr><td>26</td><td>B-106 검사</td><td>대기</td><td class="b-bad">10%</td><td>진행됐는데 대기?</td></tr>
-          <tr><td>30</td><td>B-107 도장</td><td>대기</td><td class="b-bad">25%</td><td>진행됐는데 대기?</td></tr>
-          <tr><td>9</td><td>B-102 용접</td><td>진행</td><td class="b-bad">0</td><td>진행인데 0%?</td></tr>
-          <tr><td>8</td><td>B-102 조립</td><td>완료</td><td class="b-bad">120%</td><td>완료인데 100% 아님</td></tr>
-          <tr><td>29</td><td>B-107 용접</td><td>진행</td><td class="b-bad">110%</td><td>진행인데 100% 초과</td></tr>
-        </table>
-        <div class="warn" style="margin-top:12px"><b>핵심 조치</b><p style="font-size:14px;color:#5a4a2a">① 날짜 <strong>전부 날짜형으로 통일</strong> · ② 진척률 <strong>형식 통일 + 100% 초과(행8·29) 확인</strong> · ③ 소수 진척률(행6·18)·'대기'인데 진척률 있는 건(행26·30)은 <strong>담당자 확인 [확인필요]</strong></p></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 8 확인 질문 -->
-  <section class="slide">
-    <span class="eyebrow r">BETWEEN · ASK BACK</span>
-    <div class="head r"><span class="num">3.5</span><h2>사용자 확인 질문 — 기준을 '내가' 정한다</h2></div>
-    <p class="sub r">검증에서 애매했던 부분을, 분석에 들어가기 전에 클로드가 <strong>먼저 되묻게</strong> 합니다.</p>
-    <div class="cols r" style="grid-template-columns:1fr 1fr">
-      <div>
-        <div class="prompt" style="margin-bottom:16px"><button class="copy" onclick="cp(this)">복사</button><span class="lbl">복사용 프롬프트</span>
-<pre>분석을 계속하기 전에, 기준이 불명확해서
-확인해야 할 질문을 5개 이내로 만들어줘.
-보고서 작성 전 반드시 확인할 질문 중심으로.</pre></div>
-        <div class="example" style="border-color:#c6d6f5;background:linear-gradient(180deg,#f2f6ff,#fbfcff)">
-          <span class="tag" style="background:linear-gradient(135deg,var(--blue),var(--blue2))">💬 내가 정해주는 기준</span>
-          <p style="font-size:15px;line-height:1.7">실적일 비어 있으면 <strong>미완료</strong>, 진척률 100% 초과는 <strong>이상값</strong>, 계획일보다 실적일 늦으면 <strong>지연</strong>, 담당자 공란은 <strong>누락</strong>, '--'·빈칸은 <strong>형식 오류</strong>로 분류.</p>
-        </div>
-      </div>
-      <div class="example">
-        <span class="tag">✔ 클로드 예시 질문</span>
-        <ol style="line-height:1.85;font-size:15.5px">
-          <li>진척률 <strong>120%·110%</strong>는 오류? 재작업 반영?</li>
-          <li>실적일 <strong>빈칸</strong>이면 무조건 미완료?</li>
-          <li>'완료'인데 실적/진척률 불일치 시 <strong>어느 쪽 신뢰</strong>?</li>
-          <li>날짜는 <strong>yyyy-mm-dd</strong>로 통일?</li>
-          <li>담당자 공란은 <strong>누구에게 확인</strong>?</li>
-        </ol>
-      </div>
-    </div>
-    <div class="why r" style="margin-top:14px"><b>❓ 왜 되묻게 하나요</b><p>기준을 클로드가 <strong>멋대로 가정</strong>하면 현장과 어긋납니다. 판단 기준의 <strong>주도권은 담당자</strong>에게 — 확인 질문은 그 기준을 명시적으로 못 박는 장치입니다.</p></div>
-  </section>
-
-  <!-- 9 STEP3 분석 -->
-  <section class="slide">
-    <span class="eyebrow r">STEP 3 · ANALYZE</span>
-    <div class="head r"><span class="num">6</span><h2>데이터 분석 — 인식·검증·내 기준을 반영</h2></div>
-    <p class="sub r">앞 결과와 내가 정한 기준을 합쳐 5가지 관점으로 분석합니다. <strong>(보고서는 아직 X)</strong></p>
-    <div class="cols r" style="grid-template-columns:.9fr 1.1fr">
-      <div>
-        <div class="prompt" style="margin-bottom:14px"><button class="copy" onclick="cp(this)">복사</button><span class="lbl">복사용 프롬프트</span>
-<pre style="max-height:360px;overflow-y:auto">앞에서 확인한 데이터 인식 결과, 공통 검증 결과, 그리고 내가 답변한 업무 기준을 반영해서 데이터 분석을 진행해줘.
-분석은 다음 관점으로 해줘.
-## 1. 전체 현황 분석
-- 전체 데이터 건수
-- 주요 항목별 분포
-- 상태별 또는 유형별 현황
-- 완료/미완료, 정상/이상, 지연/정상 등 구분 가능한 현황
-## 2. 그룹별 분석
-- 주요 기준 컬럼별로 데이터를 나누어 분석
-- 부서, 담당자, 공정, 설비, 구역, 항목, 상태 등 의미 있는 기준으로 구분
-- 그룹별 차이점과 특징 정리
-## 3. 문제 항목 분석
-- 누락값이 있는 항목
-- 오류 가능성이 있는 항목
-- 이상값
-- 중복 또는 표기 불일치
-- 상태값과 실제 데이터가 맞지 않는 항목
-## 4. 우선순위 분석
-- 먼저 확인해야 할 항목
-- 업무 영향도가 큰 항목
-- 조치가 지연될 경우 문제가 커질 수 있는 항목
-- 담당자 확인이 필요한 항목
-## 5. 패턴 분석
-- 반복적으로 나타나는 문제
-- 특정 그룹에 집중된 문제
-- 특정 상태나 유형에서 많이 발생하는 문제
-- 데이터 입력 방식에서 드러나는 공통 문제
-## 출력 형식
-다음 형식으로 작성해줘.
-### 데이터 분석 결과
-#### 1. 전체 현황
-#### 2. 그룹별 분석
-#### 3. 주요 문제 항목
-#### 4. 우선 조치 항목
-#### 5. 반복 패턴
-마지막에는 분석 결과를 md파일로 요약해줘.
-주의사항:
-- 데이터에 없는 원인은 추측하지 마.
-- 확인되지 않은 원인은 [확인필요]로 표시해.
-- 분석 결과와 단순 의견을 구분해줘.
-- 보고서는 아직 작성하지 말고 분석까지만 진행해.
-- askuserquestion이 필요하면 활용해줘</pre></div>
-      </div>
-      <div class="example">
-        <span class="tag">✔ 클로드 예시 — 결과 미리보기</span>
-        <p style="font-size:15px"><strong>전체:</strong> 30건 · 완료 12(40%)·진행 16(53%)·대기 2(7%)</p>
-        <p style="font-size:15px"><strong>선종/공정:</strong> LNG16·CT8·TK6 / 절단8·조립8·용접7·검사4·도장3</p>
-        <p style="font-size:15px"><strong>지연:</strong> 실적 16건 중 지연 7·조기 1·정상 8 · 진척률 초과 <span class="b-ok">0</span>(정정완료)</p>
-        <p style="font-size:15px"><strong>최우선:</strong> 행12 B-103 조립 — 3일 지연 + 담당자 공란</p>
-        <p style="font-size:13.5px;color:var(--muted);margin-top:8px">→ 5개 관점 상세는 다음 장(분석 결과 ①·②)에서.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- 분석 결과 ① -->
-  <section class="slide">
-    <span class="eyebrow r">STEP 3 · RESULT ① · 전체 현황 &amp; 그룹별</span>
-    <div class="head r"><span class="num">📊</span><h2>데이터 분석 결과 — 전체 현황 · 그룹별</h2></div>
-    <p class="sub r">검증완료 데이터(30건) 기준. 사실 중심으로 정리하고, 해석은 <strong>[의견]</strong>으로 구분합니다.</p>
-    <div class="cols r" style="grid-template-columns:.95fr 1.05fr">
-      <div class="example">
-        <span class="tag">1 · 전체 현황</span>
-        <p style="font-size:14.5px">· 전체 <strong>30건</strong> (8블록 × 공정 3~4개)</p>
-        <p style="font-size:14.5px">· 상태 <strong>완료 12(40%) · 진행 16(53%) · 대기 2(7%)</strong></p>
-        <p style="font-size:14.5px">· 선종 LNG 16 · CONTAINER 8 · TANKER 6</p>
-        <p style="font-size:14.5px">· 공정 절단8 · 조립8 · 용접7 · 검사4 · 도장3</p>
-        <p style="font-size:14.5px">· 실적일 입력 16건 / <strong>미완료(실적 없음) 14건</strong></p>
-        <p style="font-size:14.5px">· 실적 16건 중 <strong>지연 7 · 조기완료 1 · 정상 8</strong></p>
-        <p style="font-size:14.5px">· 진척률 100% 초과 <strong class="b-ok">0건</strong> (이전 120·110% 정정 완료)</p>
-      </div>
-      <div>
-        <h4 style="color:var(--navy);font-size:15px;margin-bottom:6px;font-weight:700">2 · 그룹별 분석</h4>
-        <table class="mini">
-          <tr><th>선종</th><th>건수</th><th>지연</th><th>평균 진척률</th></tr>
-          <tr><td>TANKER</td><td>6</td><td>1</td><td>82%</td></tr>
-          <tr><td>CONTAINER</td><td>8</td><td>2</td><td>74%</td></tr>
-          <tr><td>LNG</td><td>16</td><td class="b-warn">4</td><td>68%</td></tr>
-        </table>
-        <table class="mini" style="margin-top:8px">
-          <tr><th>공정</th><th>건수</th><th>지연</th><th>실적 없음</th></tr>
-          <tr><td>절단</td><td>8</td><td>1</td><td>0</td></tr>
-          <tr><td>조립</td><td>8</td><td class="b-warn">4</td><td>3</td></tr>
-          <tr><td>용접</td><td>7</td><td>2</td><td class="b-warn">5</td></tr>
-          <tr><td>검사</td><td>4</td><td>0</td><td>3</td></tr>
-          <tr><td>도장</td><td>3</td><td>0</td><td>3</td></tr>
-        </table>
-        <p style="font-size:12.5px;color:#3a4763;margin-top:7px;line-height:1.5">담당자: 김민수·최은지 5건, 나머지 4건, 공란 4건 → 편중 크지 않음. <span style="color:var(--muted)">[의견] 절단은 순조, 후반 공정에 미완료 몰림(진행 단계상 자연스러울 수 있어 단정 안 함).</span></p>
-      </div>
-    </div>
-  </section>
-
-  <!-- 분석 결과 ② -->
-  <section class="slide">
-    <span class="eyebrow r">STEP 3 · RESULT ② · 문제 · 우선조치 · 패턴</span>
-    <div class="head r"><span class="num">📊</span><h2>데이터 분석 결과 — 문제 · 우선순위 · 패턴</h2></div>
-    <p class="sub r">확인이 필요한 항목은 <strong>[확인필요]</strong>, 해석은 <strong>[의견]</strong>으로 표시했습니다.</p>
-    <div class="cols r" style="grid-template-columns:1.12fr .88fr">
-      <div class="example" style="border-color:#f0c9c9;background:linear-gradient(180deg,#fdf4f4,#fffbfb)">
-        <span class="tag" style="background:linear-gradient(135deg,var(--bad),#e05b5b)">3 · 주요 문제 항목</span>
-        <p style="font-size:13.5px">· <strong>담당자 결측 4건</strong>: 행4·12·21·26 (모두 상태 진행)</p>
-        <p style="font-size:13.5px">· <strong>지연 7건</strong>: 행12·17·28 각 +3일, 행8·24 각 +2일, 행5·7 각 +1일</p>
-        <p style="font-size:13.5px">· <strong>상태-진척 불일치</strong>: 행9(B-102 용접) 대기인데 10%, 수정내역엔 0% <span class="chip" style="font-size:10px">[확인필요]</span></p>
-        <p style="font-size:13.5px">· <strong>추정 입력값</strong>: 행29(B-107 용접) 0.95=110%→조정 <span class="chip" style="font-size:10px">[확인필요]</span></p>
-        <p style="font-size:13.5px">· <strong>실적일 있는데 진행 4건</strong>: 행5·12·17·28 — '완료일'인지 '최근 작업일'인지 모호 <span class="chip" style="font-size:10px">[확인필요]</span></p>
-      </div>
-      <div>
-        <div class="warn" style="margin-bottom:12px"><b>4 · 우선 조치</b>
-          <p style="font-size:13px;color:#5a4a2a;line-height:1.55">① <strong>행12(B-103 조립)</strong> 3일 지연+담당자 공란 → 최우선<br>② 3일 지연(행17·28) 확대 방지<br>③ 담당자 결측 4건 책임자 지정<br>④ 행9·29 [확인필요] 실제값 확정</p>
-        </div>
-        <div class="why"><b>5 · 반복 패턴</b>
-          <p style="font-size:13px;line-height:1.55">· 조립·용접에 지연·미완료 집중(지연7중 조립4, 미완료14중 용접5)<br>· LNG에 지연 집중(7중 4)<br>· 담당자 공란은 조립·용접·검사에서만<br>· 실적일 없음=진행/대기 규칙 일관 <span style="color:var(--muted)">[의견] 원인은 데이터만으론 단정 불가 [확인필요]</span></p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 10 STEP4 인사이트 -->
-  <section class="slide">
-    <span class="eyebrow r">STEP 4 · INSIGHT</span>
-    <div class="head r"><span class="num">7</span><h2>인사이트 도출 — "그래서 뭘 하면 되는가"</h2></div>
-    <p class="sub r">단순 요약이 아니라, 담당자가 <strong>다음 행동을 결정</strong>할 수 있게 정리합니다.</p>
-    <div class="cols r" style="grid-template-columns:1fr 1.15fr">
-      <div class="prompt"><button class="copy" onclick="cp(this)">복사</button><span class="lbl">복사용 프롬프트</span>
-<pre style="max-height:380px;overflow-y:auto">위 데이터 분석 결과를 바탕으로 업무 인사이트를 도출해줘.
-인사이트는 단순 요약이 아니라,
-현업 담당자가 다음 행동을 결정할 수 있도록 작성해줘.
-다음 관점으로 정리해줘.
-## 1. 핵심 발견사항
-- 데이터에서 가장 중요하게 봐야 할 내용
-- 전체 현황에서 눈에 띄는 변화나 문제
-- 보고서에 반드시 포함해야 할 내용
-## 2. 업무상 의미
-- 이 문제가 실제 업무에 어떤 영향을 줄 수 있는지
-- 일정, 품질, 비용, 안전, 관리 측면에서 어떤 리스크가 있는지
-- 단순 입력 오류인지, 실제 업무 문제인지 구분
-## 3. 우선 조치사항
-- 가장 먼저 확인해야 할 항목
-- 담당자에게 요청해야 할 내용
-- 데이터 수정이 필요한 항목
-- 추가 확인이 필요한 항목
-## 4. 개선 제안
-- 다음부터 같은 문제가 반복되지 않도록 할 방법
-- 입력 양식 개선안
-- 검증 기준 추가
-- 정기 점검 필요 여부
-## 5. 보고용 핵심 메시지
-- 상급자에게 보고할 때 사용할 수 있는 핵심 문장
-- 3~5줄 이내로 작성
-## 출력 형식
-md파일로 다음 형식으로 작성해줘.
-### 인사이트 요약
-| 구분 | 인사이트 | 업무상 의미 | 조치 필요사항 |
-|---|---|---|---|
-### 핵심 메시지 5줄
-### 추가 확인이 필요한 질문
-주의사항:
-- 확인되지 않은 원인은 단정하지 마.
-- 원인 추정이 필요한 경우 [추정]이라고 표시해.
-- 데이터로 확인된 사실과 해석을 구분해.
-- 현업 보고에 바로 사용할 수 있는 문장으로 작성해.
-- askuserquestion이 필요하면 활용해줘</pre></div>
-      <div>
-        <div class="example" style="margin-bottom:12px">
-          <span class="tag">✔ 인사이트 요약표</span>
-          <table>
-            <tr><th>구분</th><th>인사이트</th><th>조치</th></tr>
-            <tr><td>완료 정합성</td><td>B-103 용접 '완료'인데 실적 없음</td><td class="b-bad">즉시 확인</td></tr>
-            <tr><td>데이터 품질</td><td>실적일 누락 9건→완료율 집계 불가</td><td>실적일 일괄 확인</td></tr>
-            <tr><td>진척률</td><td>120%·110% 초과 <span class="chip" style="font-size:11px">[추정]</span></td><td>입력기준 재정의</td></tr>
-            <tr><td>일정</td><td>지연 6건, 조립·용접 집중</td><td class="b-warn">만회계획 요청</td></tr>
-          </table>
-        </div>
-        <div class="why"><b>📣 보고용 핵심 메시지</b><p style="font-size:14.5px">전체 30건 중 19건에서 1개 이상 이슈 · 가장 시급한 건 <strong>B-103 용접 완료 정합성</strong> · 누락으로 진행률 신뢰도 낮음 · 정정 후 재집계 시 정상 보고 가능.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 인사이트 결과 -->
-  <section class="slide">
-    <span class="eyebrow r">STEP 4 · RESULT · 업무 인사이트</span>
-    <div class="head r"><span class="num">💡</span><h2>업무 인사이트 — 조치 중심 정리</h2></div>
-    <p class="sub r">결측보정완료 데이터(30건) · <strong>실적일=완료일 · 결측 0 · 초과 0</strong>. 인사이트=사실, <strong>[추정]</strong>=해석, <strong>[가정]</strong>=보정값.</p>
-    <table class="mini r" style="margin-bottom:11px">
-      <tr><th>구분</th><th>인사이트 (확인된 사실)</th><th>업무상 의미</th><th>조치</th></tr>
-      <tr><td>지연 완료율</td><td>완료 16건 중 <strong>7건(44%) 계획 초과</strong> (최대 3일)</td><td>일정 관리가 핵심 리스크 <span style="color:var(--muted)">[추정]</span></td><td class="b-bad">지연 7건 사유·계획일 산정 재검토</td></tr>
-      <tr><td>지연 공정 편중</td><td>지연 7건 중 조립4·용접2·절단1 (조립 50% 지연)</td><td>조립이 반복 지연 → 병목 <span style="color:var(--muted)">[추정]</span></td><td class="b-warn">조립 리드타임 점검</td></tr>
-      <tr><td>선종 격차</td><td>완료율 TK67 &gt; CT62 &gt; <strong>LNG44%</strong>, LNG 지연 최다(4)</td><td>LNG 진척·완료 뒤처짐 <span style="color:var(--muted)">[추정]</span></td><td>LNG 별도 트래킹·리소스 점검</td></tr>
-      <tr><td>미완료 후반 집중</td><td>미완료 14건 용접5·검사3·도장3 (절단 0)</td><td>마감 구간 부하 예상 <span style="color:var(--muted)">[추정]</span></td><td>후반 공정 일정·인력 사전 배분</td></tr>
-      <tr><td>데이터 정합성</td><td>결측0·초과0·상태충돌 해소 (담당자4·행29는 [가정])</td><td>집계 신뢰도 확보, 일부 확인 전제</td><td>[가정]값 실제 대조</td></tr>
-    </table>
-    <div class="grid r" style="grid-template-columns:1.05fr .95fr">
-      <div class="example">
-        <span class="tag">📣 핵심 메시지 5줄 (보고용)</span>
-        <p style="font-size:11.8px;line-height:1.45">① 30개 공정 중 완료 16(53%)·진행 12·대기 2, 완료 16 중 <strong>7건(44%)이 계획 초과</strong>.<br>② 지연은 <strong>조립(8중 4)·LNG(완료율 44%)</strong>에 집중, 최대 3일.<br>③ 미완료 14건은 용접·검사·도장 후반 공정에 몰려 마감 부하 예상.<br>④ 결측·형식오류는 정리 완료, 남은 포인트는 조립·LNG 지연·계획일 정확도.<br>⑤ 담당자 4건·일부 진척률은 <strong>[가정]</strong>값이라 실제 확인 필요.</p>
-      </div>
-      <div>
-        <div class="warn" style="margin-bottom:9px"><b>🔧 개선 제안</b><p style="font-size:11.5px;line-height:1.45;color:#5a4a2a">진척률 % 고정·실적일↔완료/100% 자동연동·담당자 필수 / 정합성 자동경고(완료-실적·대기-진척·담당자공란) / 주1회 12기준 점검</p></div>
-        <div class="why"><b>❓ 추가 확인 질문</b><p style="font-size:11.5px;line-height:1.45">① 담당자 보정 4건(행4·12·21·26) 실제 일치?<br>② 행29(B-107 용접) 진척률 95% 실제 값?<br>③ 지연 완료 7건 = 계획 오류 vs 실제 지연?<br>④ 조립·LNG 지연 = 선행공정 vs 자원배분?</p></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 11 STEP5 보고서 -->
-  <section class="slide">
-    <span class="eyebrow r">STEP 5 · REPORT</span>
-    <div class="head r"><span class="num">8</span><h2>보고서 작성 — 두 개의 MD로 Word 만들기</h2></div>
-    <p class="sub r"><strong>데이터분석.md</strong>(사실)와 <strong>인사이트.md</strong>(해석·조치)를 근거로 DOCX를 생성합니다.</p>
-    <div class="cols r" style="grid-template-columns:1.05fr .95fr">
-      <div class="prompt"><button class="copy" onclick="cp(this)">복사</button><span class="lbl">복사용 프롬프트</span>
-<pre style="max-height:300px;overflow-y:auto">첨부한 데이터분석.md 파일과 인사이트.md 파일을 바탕으로
-현업 보고용 Word 보고서 DOCX 파일을 생성해줘.
-보고서 파일명은 다음과 같이 해줘.
-공정현황_데이터검토_보고서.docx
-보고서 구성은 다음과 같이 작성해줘.
-1. 보고 제목
-2. 보고 목적
-3. 데이터 검토 범위
-4. 주요 검증 결과
-5. 데이터 분석 결과
-6. 핵심 인사이트
-7. 조치 필요사항
-8. 추가 확인사항
-9. 향후 개선 제안
-작성 조건:
-- 결론을 먼저 작성해.
-- 보고 문체는 간결하고 객관적으로 작성해.
-- 데이터분석.md의 내용은 사실 근거로 사용해.
-- 인사이트.md의 내용은 해석과 조치사항으로 사용해.
-- 확인되지 않은 내용은 [확인필요]라고 표시해.
-- 데이터에 없는 원인을 새로 만들지 마.
-- 표가 필요한 부분은 표로 정리해.
-- 상급자 보고용으로 너무 길지 않게 작성해.</pre></div>
-      <div>
-        <div class="card" style="margin-bottom:14px"><h3><span class="ico">📋</span>보고서 9구성</h3><p>제목 · 목적 · 검토 범위 · 검증 결과 · 분석 결과 · 핵심 인사이트 · 조치 필요 · 추가 확인 · 개선 제안</p></div>
-        <div class="card"><h3><span class="ico">✍</span>작성 원칙</h3><p><strong>결론 먼저</strong> · 사실↔해석 분리 · 없는 원인 금지 · 미확인 <strong>[확인필요]</strong> · 상급자용으로 짧게</p></div>
-      </div>
-    </div>
-    <div class="why r" style="margin-top:14px"><b>🔗 두 MD의 역할 분담</b><p><strong>데이터분석.md → 사실 근거</strong>(건수·항목), <strong>인사이트.md → 해석·조치</strong>(의미·행동). 보고서는 둘을 조립할 뿐 새 사실을 지어내지 않습니다.</p></div>
-  </section>
-
-  <!-- 12 왜 MD -->
-  <section class="slide">
-    <span class="eyebrow r">KEY IDEA · WHY MARKDOWN FIRST</span>
-    <div class="head r"><span class="num">＋</span><h2>왜 MD 파일을 먼저 만들면 좋은가</h2></div>
-    <p class="sub r">보고서(DOCX)로 바로 가지 않고, <strong>데이터분석.md · 인사이트.md</strong>를 먼저 만드는 이유입니다.</p>
-    <div class="grid g4 r" style="margin-bottom:16px">
-      <div class="card"><h3><span class="ico">🤖</span>AI가 읽기 쉬운 문서</h3><p>MD는 표식이 단순한 <strong>순수 텍스트</strong>라 AI가 오해 없이 읽고 다시 활용하기 좋습니다.</p></div>
-      <div class="card"><h3><span class="ico">🔁</span>재사용 쉽다</h3><p>MD 하나로 <strong>Word·PPT·Excel·<br>대시보드</strong>. 내용은 한 곳에서 관리.</p></div>
-      <div class="card"><h3><span class="ico">✂</span>수정·검수 편함</h3><p>텍스트라 <strong>고친 곳이 한눈에</strong>. <br>문장 단위 검토에 좋습니다.</p></div>
-      <div class="card"><h3><span class="ico">🧾</span>이력 추적</h3><p>"어떤 사실→이 결론"이 <br><strong>중간 근거로 보존</strong>됩니다.</p></div>
-    </div>
-    <div class="cols r" style="grid-template-columns:1fr 1fr;flex:none;margin-bottom:14px">
-      <div class="warn" style="margin:0"><b>❌ MD 없이 바로 Word로 가면</b><p style="font-size:15px;color:#5a4a2a">사실·해석·형식이 뒤섞이고, 고칠 때마다 문서를 통째로 다시 손봐야 하며, <br>어떤 근거로 그 결론이 나왔는지 남지 않습니다.</p></div>
-      <div class="why" style="margin:0;border-left-color:var(--ok);background:linear-gradient(90deg,#eefaf3,#fbfffc)"><b style="color:var(--ok)">✅ MD를 먼저(우선) 만들면</b><p style="font-size:15px">검증된 내용만 <strong>원본으로 고정</strong> → 같은 MD 하나로 <br><strong>Word·PPT·Excel·대시보드</strong>까지 빠르고 안전하게 확장됩니다.</p></div>
-    </div>
-    <p class="r" style="text-align:center;color:var(--navy);font-weight:800;font-size:18px"><strong>MD = 검증된 원본</strong> · 보고서 = 그 원본의 옷 갈아입히기 🧩</p>
-  </section>
-
-  <!-- 13 트러블슈팅 -->
-  <section class="slide">
-    <span class="eyebrow r">TROUBLESHOOTING</span>
-    <div class="head r"><span class="num">!</span><h2>자주 하는 실수 &amp; 대처</h2></div>
-    <p class="sub r">막히는 건 대부분 아래 4가지입니다. 당황하지 말고 대처법대로 하면 됩니다.</p>
-    <table class="r" style="margin-bottom:16px">
-      <tr><th style="width:26%">증상</th><th style="width:34%">원인</th><th>대처</th></tr>
-      <tr><td>파일 내용을 못 읽어요</td><td>첨부 누락 / 형식 문제</td><td>파일을 <strong>다시 첨부</strong>, .xlsx인지 확인 후 재전송</td></tr>
-      <tr><td>답이 엉뚱해요</td><td>인식 단계를 건너뜀</td><td><strong>STEP 1부터</strong> "먼저 구조를 인식해줘"로 다시 시작</td></tr>
-      <tr><td>숫자가 실제와 달라요</td><td>원본 오류 또는 AI 착오</td><td><strong>원본과 대조</strong>, 안 맞으면 <strong>[확인필요]</strong>로 남김</td></tr>
-      <tr><td>내 기준을 무시해요</td><td>기준을 안 알려줌</td><td>확인 질문에 답해 <strong>기준을 명시</strong>한 뒤 재요청</td></tr>
-    </table>
-    <div class="why r"><b>💡 핵심 팁</b><p>한 번에 완벽하지 않아도 됩니다. 클로드는 대화를 기억하므로 <strong>"여기를 이렇게 바꿔줘"로 이어서 고치는 것</strong>이 정석입니다. 처음부터 다시 쓰지 마세요.</p></div>
-  </section>
-
-  <!-- 14 퀴즈 Q1 -->
-  <section class="slide">
-    <span class="eyebrow r">CHECK · 문제 1 / 3</span>
-    <div class="head r"><span class="num">?</span><h2>이해도 점검 — 1번</h2></div>
-    <p class="sub r">정답을 고른 뒤 <strong>답안 확인</strong>을 눌러 보세요.</p>
-    <div class="qprog r"><span class="on"></span><span></span><span></span></div>
-    <div class="fill"></div>
-    <div class="quiz r">
-      <div class="qtext">데이터를 클로드에 올린 뒤, 가장 먼저 할 일은?</div>
-      <div class="opts">
-        <button class="opt" onclick="pick(this)"><span class="k">①</span> 바로 분석시킨다</button>
-        <button class="opt" data-correct="1" onclick="pick(this)"><span class="k">②</span> 데이터 구조부터 인식시킨다</button>
-      </div>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <button class="reveal" onclick="reveal(this)">답안 확인</button>
-        <button class="qnext" onclick="go(1)">다음 문제 →</button>
-      </div>
-      <div class="ans">
-        <b>정답 : ② 구조부터 인식</b>
-        <p>바로 분석시키면 클로드가 데이터를 오해한 채 답을 낼 수 있습니다. 먼저 "어떻게 이해했는지"를 확인해 오해를 초반에 바로잡습니다.</p>
-      </div>
-    </div>
-    <div class="fill"></div>
-  </section>
-
-  <!-- 15 퀴즈 Q2 -->
-  <section class="slide">
-    <span class="eyebrow r">CHECK · 문제 2 / 3</span>
-    <div class="head r"><span class="num">?</span><h2>이해도 점검 — 2번</h2></div>
-    <p class="sub r">정답을 고른 뒤 <strong>답안 확인</strong>을 눌러 보세요.</p>
-    <div class="qprog r"><span class="on"></span><span class="on"></span><span></span></div>
-    <div class="fill"></div>
-    <div class="quiz r">
-      <div class="qtext">진척률 <span style="color:var(--bad)">120%</span>는 어떻게 봐야 할까요?</div>
-      <div class="opts">
-        <button class="opt" onclick="pick(this)"><span class="k">①</span> 초과 달성이니 정상 값</button>
-        <button class="opt" data-correct="1" onclick="pick(this)"><span class="k">②</span> 확인이 필요한 이상값</button>
-      </div>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <button class="reveal" onclick="reveal(this)">답안 확인</button>
-        <button class="qnext" onclick="go(1)">다음 문제 →</button>
-      </div>
-      <div class="ans">
-        <b>정답 : ② 이상값</b>
-        <p>진척률의 상한은 100%입니다. 100%를 넘는 값은 입력 기준을 다시 확인해야 하는 이상값으로, 그대로 두면 공정률 집계가 왜곡됩니다.</p>
-      </div>
-    </div>
-    <div class="fill"></div>
-  </section>
-
-  <!-- 16 퀴즈 Q3 -->
-  <section class="slide">
-    <span class="eyebrow r">CHECK · 문제 3 / 3</span>
-    <div class="head r"><span class="num">?</span><h2>이해도 점검 — 3번</h2></div>
-    <p class="sub r">정답을 고른 뒤 <strong>답안 확인</strong>을 눌러 보세요.</p>
-    <div class="qprog r"><span class="on"></span><span class="on"></span><span class="on"></span></div>
-    <div class="fill"></div>
-    <div class="quiz r">
-      <div class="qtext">데이터로 확인되지 않은 원인은 보고서에 어떻게 적을까요?</div>
-      <div class="opts">
-        <button class="opt" onclick="pick(this)"><span class="k">①</span> 그럴듯하게 추측해서 적는다</button>
-        <button class="opt" data-correct="1" onclick="pick(this)"><span class="k">②</span> <strong>[확인필요]</strong>로 남긴다</button>
-      </div>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <button class="reveal" onclick="reveal(this)">답안 확인</button>
-        <button class="qnext" onclick="go(1)">정리 보기 →</button>
-      </div>
-      <div class="ans">
-        <b>정답 : ② [확인필요]로 남긴다</b>
-        <p>근거 없는 원인을 지어내지 않습니다. 확인되지 않은 항목은 <strong>[확인필요]</strong>로 표시해 사람이 직접 검증하도록 넘깁니다. 사실과 추정을 섞지 않는 것이 핵심입니다.</p>
-      </div>
-    </div>
-    <div class="fill"></div>
-  </section>
-
-  <!-- 15 확장/정리 -->
-  <section class="slide">
-    <span class="eyebrow r">EXPAND &amp; RECAP</span>
-    <div class="head r"><span class="num">9</span><h2>결과물 확장 &amp; 오늘의 정리</h2></div>
-    <p class="sub r">같은 근거(MD)로 상황별 결과물을 뽑고, 배운 흐름을 체크리스트로 마무리합니다.</p>
-    <div class="grid g4 r" style="margin-bottom:16px">
-      <div class="card"><h3><span class="ico">📊</span>PPT</h3><p>5장 스토리보드 · 발표·회의용</p></div>
-      <div class="card"><h3><span class="ico">📕</span>PDF</h3><p>배포·결재용 고정 문서</p></div>
-      <div class="card"><h3><span class="ico">📗</span>Excel</h3><p>붙여넣기용 검토표·재집계</p></div>
-      <div class="card"><h3><span class="ico">📈</span>대시보드</h3><p>지연·진척률 상시 모니터링</p></div>
-    </div>
-    <div class="example r" style="border-color:#c6d6f5;background:linear-gradient(180deg,#f2f6ff,#fbfcff)">
-      <span class="tag" style="background:linear-gradient(135deg,var(--navy),var(--blue))">✅ 오늘의 핵심 체크리스트</span>
-      <ul style="line-height:1.85;font-size:16px;color:#2a3653">
-        <li>분석 전 <strong>인식 → 검증</strong>을 먼저, 표시된 엑셀은 <strong>사람이 확인·수정</strong>.</li>
-        <li>판단 <strong>기준의 주도권은 담당자</strong> — 애매하면 클로드가 되묻게.</li>
-        <li><strong>사실과 해석을 분리</strong>, 미확인은 <strong>[확인필요]</strong>로만.</li>
-        <li><strong>MD를 먼저</strong> 만들어 근거를 고정한 뒤 보고서·PPT로 확장.</li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- 마무리 (종료) -->
-  <section class="slide cover">
-    <div class="r" style="margin:auto;text-align:center">
-      <div style="font-size:66px;line-height:1">🎉</div>
-      <h1 style="font-size:60px;margin:16px 0 20px">수고하셨습니다</h1>
-      <p class="lead" style="margin:0 auto;max-width:800px"><b style="color:#fff">"엑셀을 대신 읽히지 말고, 함께 검토하라."</b><br>인식 → 검증 → 사람 확인 → 분석 → 인사이트 → 보고서.<br>이 순서만 지키면 어떤 데이터든 신뢰할 수 있는 보고서를 만들 수 있습니다.</p>
-      <p style="margin-top:32px;color:#9fb4e0;font-size:15px;font-weight:600;letter-spacing:.02em">삼성중공업 · 클로드 기본교육 레벨 1 · Chat 1</p>
-    </div>
-  </section>
-
-  </div><!-- /stage -->
-</div><!-- /viewport -->
-
-<div id="dots"></div>
-<div id="hud">
-  <div class="brand"><span class="logo">SHI</span> 클로드 기본교육 Lv.1 · Chat 1</div>
-  <div class="ctrls">
-    <button class="btn icon" onclick="toggleOverview()" title="전체 보기 (O)">▦</button>
-    <button class="btn icon" onclick="toggleFs()" title="전체화면 (F)">⛶</button>
-    <button class="btn" id="prev" onclick="go(-1)">← 이전</button>
-    <span class="counter" id="counter">1 / 27</span>
-    <button class="btn" id="next" onclick="go(1)">다음 →</button>
   </div>
 </div>
 
-<div id="overview" onclick="if(event.target.id==='overview')toggleOverview()">
-  <h3>전체 슬라이드 — 눌러서 이동</h3>
-  <div class="ovgrid" id="ovgrid"></div>
-</div>
-<div id="toast"></div>
-
-<div id="xlsmodal" onclick="if(event.target.id==='xlsmodal')closeXls()">
-  <button class="xclose" onclick="closeXls()">✕ 닫기</button>
-  <div class="xlsbox">
-    <div class="xtitle">Chat 실습용 블록 공정현황 샘플 데이터 — 검토 표시 (🟥 빨간 셀 = 관리자 직접 수정 대상)</div>
-    <table class="xtab">
-      <tr><th>블록</th><th>선종</th><th>공정</th><th>계획일</th><th>실적일</th><th>진척률</th><th>담당자</th><th>작업구역</th><th>상태</th><th>비고</th></tr>
-      <tr><td>B-101</td><td>LNG</td><td>절단</td><td>2026-07-01</td><td>2026-07-01</td><td>100%</td><td>김민수</td><td>A-01</td><td>완료</td><td></td></tr>
-      <tr><td>B-101</td><td>LNG</td><td>조립</td><td>2026-07-05</td><td></td><td>60%</td><td></td><td>A-02</td><td>진행</td><td>실적 미입력</td></tr>
-      <tr><td>B-101</td><td>LNG</td><td>용접</td><td>2026-07-08</td><td>2026-07-09</td><td>90%</td><td>박지훈</td><td>A-02</td><td>진행</td><td>1일 지연</td></tr>
-      <tr><td>B-101</td><td>LNG</td><td>검사</td><td class="xr">2026.07.10</td><td></td><td class="xr">0.8</td><td>최은지</td><td>A-03</td><td>대기</td><td>진척률 형식 확인</td></tr>
-      <tr><td>B-102</td><td>LNG</td><td>절단</td><td>2026-07-02</td><td>2026-07-03</td><td>100%</td><td>이서준</td><td>B-01</td><td>완료</td><td>1일 지연</td></tr>
-      <tr><td>B-102</td><td>LNG</td><td>조립</td><td>2026-07-08</td><td>2026-07-10</td><td>120%</td><td>박지훈</td><td>B-02</td><td>완료</td><td>진척률 100% 초과</td></tr>
-      <tr><td>B-102</td><td>LNG</td><td>용접</td><td>2026-07-11</td><td></td><td class="xr">--</td><td>정다은</td><td>B-03</td><td>진행</td><td>진척률 오류</td></tr>
-      <tr><td>B-102</td><td>LNG</td><td>도장</td><td class="xr">7/15</td><td></td><td>30%</td><td>김민수</td><td>B-04</td><td>진행</td><td>날짜 형식 혼재</td></tr>
-      <tr><td>B-103</td><td>CONTAINER</td><td>절단</td><td>2026-07-04</td><td>2026-07-04</td><td>100%</td><td>이서준</td><td>C-01</td><td>완료</td><td></td></tr>
-      <tr><td>B-103</td><td>CONTAINER</td><td>조립</td><td>2026-07-09</td><td>2026-07-12</td><td>75%</td><td></td><td>C-02</td><td>진행</td><td>담당자 공란, 3일 지연</td></tr>
-      <tr><td>B-103</td><td>CONTAINER</td><td>용접</td><td>2026-07-13</td><td class="xr"></td><td>50%</td><td>오현우</td><td>C-03</td><td class="xr">완료</td><td>상태와 실적일 불일치</td></tr>
-      <tr><td>B-103</td><td>CONTAINER</td><td>검사</td><td>2026-07-14</td><td>2026-07-14</td><td>100%</td><td>최은지</td><td>C-04</td><td>완료</td><td></td></tr>
-      <tr><td>B-104</td><td>TANKER</td><td>절단</td><td>2026-07-05</td><td>2026-07-05</td><td>100%</td><td>김민수</td><td>D-01</td><td>완료</td><td></td></tr>
-      <tr><td>B-104</td><td>TANKER</td><td>조립</td><td>2026-07-10</td><td>2026-07-09</td><td>100%</td><td>정다은</td><td>D-02</td><td>완료</td><td>조기 완료</td></tr>
-      <tr><td>B-104</td><td>TANKER</td><td>용접</td><td>2026-07-12</td><td>2026-07-15</td><td>85%</td><td>오현우</td><td>D-02</td><td>진행</td><td>3일 지연</td></tr>
-      <tr><td>B-104</td><td>TANKER</td><td>도장</td><td class="xr">2026/07/16</td><td></td><td class="xr"></td><td>최은지</td><td>D-03</td><td>대기</td><td>실적·진척률 누락</td></tr>
-      <tr><td>B-105</td><td>LNG</td><td>절단</td><td>2026-07-06</td><td>2026-07-06</td><td>100%</td><td>이서준</td><td>E-01</td><td>완료</td><td></td></tr>
-      <tr><td>B-105</td><td>LNG</td><td>조립</td><td>2026-07-11</td><td></td><td>65%</td><td>박지훈</td><td>E-02</td><td>진행</td><td></td></tr>
-      <tr><td>B-105</td><td>LNG</td><td>용접</td><td>2026-07-15</td><td></td><td>40%</td><td></td><td>E-03</td><td>진행</td><td>담당자 누락</td></tr>
-      <tr><td>B-105</td><td>LNG</td><td>검사</td><td>2026-07-18</td><td></td><td>0%</td><td>최은지</td><td>E-04</td><td>대기</td><td></td></tr>
-      <tr><td>B-106</td><td>CONTAINER</td><td>절단</td><td>2026-07-07</td><td>2026-07-07</td><td>100%</td><td>김민수</td><td>F-01</td><td>완료</td><td></td></tr>
-      <tr><td>B-106</td><td>CONTAINER</td><td>조립</td><td>2026-07-12</td><td>2026-07-14</td><td>100%</td><td>정다은</td><td>F-02</td><td>완료</td><td>2일 지연</td></tr>
-      <tr><td>B-106</td><td>CONTAINER</td><td>용접</td><td>2026-07-16</td><td></td><td>55%</td><td>오현우</td><td>F-03</td><td>진행</td><td></td></tr>
-      <tr><td>B-106</td><td>CONTAINER</td><td>검사</td><td>2026-07-20</td><td></td><td>10%</td><td></td><td>F-04</td><td>대기</td><td>담당자 공란</td></tr>
-      <tr><td>B-107</td><td>LNG</td><td>절단</td><td>2026-07-08</td><td>2026-07-08</td><td>100%</td><td>이서준</td><td>G-01</td><td>완료</td><td></td></tr>
-      <tr><td>B-107</td><td>LNG</td><td>조립</td><td>2026-07-13</td><td>2026-07-16</td><td>95%</td><td>박지훈</td><td>G-02</td><td>진행</td><td>3일 지연</td></tr>
-      <tr><td>B-107</td><td>LNG</td><td>용접</td><td>2026-07-17</td><td></td><td>110%</td><td>오현우</td><td>G-03</td><td>진행</td><td>진척률 이상</td></tr>
-      <tr><td>B-107</td><td>LNG</td><td>도장</td><td>2026-07-22</td><td></td><td>25%</td><td>최은지</td><td>G-04</td><td>대기</td><td></td></tr>
-      <tr><td>B-108</td><td>TANKER</td><td>절단</td><td>2026-07-09</td><td>2026-07-09</td><td>100%</td><td>김민수</td><td>H-01</td><td>완료</td><td></td></tr>
-      <tr><td>B-108</td><td>TANKER</td><td>조립</td><td>2026-07-14</td><td></td><td>70%</td><td>정다은</td><td>H-02</td><td>진행</td><td>실적 미입력</td></tr>
-    </table>
+<!-- ADMIN: applicants table (full width) -->
+<div class="wrap" id="adminTableWrap" style="display:none;grid-template-columns:1fr;padding-top:0">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h2 style="margin:0">지원자 일정 전체 보기</h2>
+      <button class="btn red" style="width:auto;padding:8px 14px;font-size:13px" onclick="doLogout()">로그아웃</button>
+    </div>
+    <div id="adminTable"></div>
   </div>
 </div>
 
-<div id="promptmodal" onclick="if(event.target.id==='promptmodal')closePmt()">
-  <button class="xclose" onclick="closePmt()">✕ 닫기</button>
-  <div class="prompt">
-    <button class="copy" onclick="cp(this)">복사</button>
-    <span class="lbl">STEP 1 · 기존 인식 프롬프트</span>
-<pre>첨부한 엑셀 데이터를 바로 분석하지 말고,
-먼저 데이터 구조를 인식해줘.
-다음 항목을 확인해줘.
-1. 이 엑셀이 어떤 업무 데이터로 보이는지
-2. 포함된 시트 목록
-3. 각 시트의 역할 추정
-4. 주요 컬럼명
-5. 각 컬럼의 의미
-6. 행 단위 데이터가 무엇을 의미하는지
-7. 이 데이터로 분석할 수 있는 내용
-8. 분석 전에 추가로 확인해야 할 내용
-askuserquestion이 필요하면 활용해줘</pre>
-  </div>
-</div>
+<div class="toast" id="toast"></div>
 
 <script>
-document.body.classList.add('js');
-const stage=document.getElementById('stage');
-const slides=[...document.querySelectorAll('.slide')];
-const titles=["표지","🎯 학습 목표","1 · 챗의 장점","2 · 전체 흐름","3 · 엑셀 데이터","STEP0 · 실습 준비","STEP1 · 데이터 인식","인식 결과","클로드의 3가지 질문","검토 표시 결과","수정본 재인식","STEP2 · 데이터 검증","검증 결과","확인 질문","STEP3 · 데이터 분석","분석 결과 ①","분석 결과 ②","STEP4 · 인사이트","인사이트 결과","STEP5 · 보고서","＋ 왜 MD 먼저","자주 하는 실수","퀴즈 1번","퀴즈 2번","퀴즈 3번","확장·정리","마무리"];
-let cur=0;
+/* ---------- 데이터 ---------- */
+const MONTHS = [[2026,6],[2026,7],[2026,8],[2026,9],[2026,10],[2026,11],[2026,12],[2027,1]];
+const DOW = ['일','월','화','수','목','금','토'];
+const _now = new Date();
+const TODAY = `${_now.getFullYear()}-${String(_now.getMonth()+1).padStart(2,'0')}-${String(_now.getDate()).padStart(2,'0')}`;
+const HOLIDAYS = {
+  '2026-06-06':'현충일','2026-08-15':'광복절','2026-09-24':'추석연휴','2026-09-25':'추석',
+  '2026-09-26':'추석연휴','2026-09-28':'대체공휴일','2026-10-03':'개천절','2026-10-09':'한글날',
+  '2026-12-25':'크리스마스','2027-01-01':'신정',
+};
 
-function fit(){
-  const pad=54;
-  const s=Math.min((window.innerWidth-pad*2)/1280,(window.innerHeight-118)/720);
-  stage.style.transform="scale("+s+")";
+let state = {
+  mode:'user',
+  isAdmin:false,
+  selStart:null,
+  selEnd:null,
+  applications: load('bt_apps', []),
+  noLecture: load('bt_nolec', []),
+  lectures: load('bt_lec', {}),      // { 'YYYY-MM-DD': {level:1|2, hours:6|8} }
+  required: load('bt_req', {}),      // { 'YYYY-MM-DD': 필요인원(number) }
+  brush: 'lv1',                       // lv1 | lv2 | need | nolec | clear
+  hours: 6,                          // 6 | 8 (레벨 강의 지정 시)
+};
+
+function load(k,def){ try{ const v=JSON.parse(localStorage.getItem(k)); return (v===null||v===undefined)?def:v; }catch(e){ return def; } }
+function save(){
+  localStorage.setItem('bt_apps',JSON.stringify(state.applications));
+  localStorage.setItem('bt_nolec',JSON.stringify(state.noLecture));
+  localStorage.setItem('bt_lec',JSON.stringify(state.lectures));
+  localStorage.setItem('bt_req',JSON.stringify(state.required));
 }
-window.addEventListener('resize',fit);fit();
 
-const dotsWrap=document.getElementById('dots'),ov=document.getElementById('ovgrid');
-slides.forEach((_,i)=>{
-  const d=document.createElement('div');d.className='dot';d.dataset.t=titles[i];d.onclick=()=>show(i);dotsWrap.appendChild(d);
-  const c=document.createElement('div');c.className='ovcard';
-  c.innerHTML='<div class="idx">'+(i+1).toString().padStart(2,'0')+' / '+slides.length+'</div><div class="ttl">'+titles[i]+'</div>';
-  c.onclick=()=>{show(i);toggleOverview();};ov.appendChild(c);
-});
-const dots=[...document.querySelectorAll('.dot')],ovcards=[...document.querySelectorAll('.ovcard')];
+/* ---------- 유틸 ---------- */
+const pad = n => String(n).padStart(2,'0');
+const key = (y,m,d) => `${y}-${pad(m)}-${pad(d)}`;
+function fmt(dstr){ const [y,m,d]=dstr.split('-'); return `${y}년 ${+m}월 ${+d}일`; }
+function isRed(y,m,d){ const w=new Date(y,m-1,d).getDay(); return w===0||w===6||HOLIDAYS[key(y,m,d)]; }
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2200); }
 
-function show(i){
-  i=Math.max(0,Math.min(slides.length-1,i));
-  slides.forEach((s,k)=>{s.classList.toggle('active',k===i);s.classList.toggle('prev',k<i);});
-  dots.forEach((d,k)=>d.classList.toggle('on',k===i));
-  ovcards.forEach((c,k)=>c.classList.toggle('on',k===i));
-  document.getElementById('counter').textContent=(i+1)+' / '+slides.length;
-  document.getElementById('prev').disabled=i===0;
-  document.getElementById('next').disabled=i===slides.length-1;
-  slides[i].querySelectorAll('.opt').forEach(o=>o.classList.remove('sel','correct','wrong'));
-  slides[i].querySelectorAll('.ans').forEach(a=>a.classList.remove('show'));
-  slides[i].querySelectorAll('.reveal').forEach(b=>b.style.display='');
-  const rs=slides[i].querySelectorAll('.r');
-  rs.forEach(el=>{el.style.transitionDelay='0s';el.style.opacity='0';el.style.transform='translateY(16px)';});
-  void slides[i].offsetWidth;
-  rs.forEach((el,k)=>{el.style.transitionDelay=(0.06*k)+'s';el.style.opacity='';el.style.transform='';});
-  if(slides[i].querySelector('[data-count]'))countUp(slides[i]);
-  cur=i;
+/* ---------- 모드 전환 ---------- */
+function setMode(m){
+  state.mode=m;
+  document.getElementById('mUser').classList.toggle('active',m==='user');
+  document.getElementById('mAdmin').classList.toggle('active',m==='admin');
+  const admin = m==='admin' && state.isAdmin;
+  document.getElementById('applyCard').style.display = m==='user' ? '' : 'none';
+  document.getElementById('loginCard').style.display = (m==='admin' && !state.isAdmin) ? '' : 'none';
+  document.getElementById('setCard').style.display = admin ? '' : 'none';
+  document.getElementById('adminTableWrap').style.display = admin ? '' : 'none';
+  document.getElementById('calTitle').textContent = admin ? '지원 현황 · 강의일 설정' : '날짜를 선택해 지원하기';
+  if(m!=='user') clearSelection(true);
+  render();
 }
-function go(d){show(cur+d);}
+function doLogin(){
+  const id=document.getElementById('admId').value.trim();
+  const pw=document.getElementById('admPw').value;
+  if(id==='admin' && pw==='1234'){ state.isAdmin=true; document.getElementById('admPw').value='';
+    toast('관리자로 로그인했습니다'); setMode('admin'); }
+  else toast('아이디 또는 비밀번호가 올바르지 않습니다');
+}
+function doLogout(){ state.isAdmin=false; toast('로그아웃되었습니다'); setMode('user'); }
 
-function countUp(slide){
-  slide.querySelectorAll('[data-count]').forEach(el=>{
-    const end=+el.dataset.count;let t0=null;
-    function step(ts){if(!t0)t0=ts;const p=Math.min((ts-t0)/900,1);
-      el.textContent=Math.round(end*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(step);}
-    requestAnimationFrame(step);
+/* ---------- 브러시(설정 종류) ---------- */
+function initBrush(){
+  document.querySelectorAll('#brush button').forEach(b=>{
+    b.onclick=()=>{ state.brush=b.dataset.b; syncBrush(); };
   });
-}
-
-function toggleOverview(){document.getElementById('overview').classList.toggle('show');}
-function toggleFs(){if(!document.fullscreenElement){document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();}else{document.exitFullscreen();}}
-document.addEventListener('fullscreenchange',()=>setTimeout(fit,60));
-
-document.querySelectorAll('[data-goto]').forEach(el=>el.addEventListener('click',()=>show(+el.dataset.goto)));
-
-function openXls(){document.getElementById('xlsmodal').classList.add('show');}
-function closeXls(){document.getElementById('xlsmodal').classList.remove('show');}
-function openPmt(){document.getElementById('promptmodal').classList.add('show');}
-function closePmt(){document.getElementById('promptmodal').classList.remove('show');}
-function pick(btn){
-  [...btn.parentElement.children].forEach(o=>o.classList.remove('sel'));
-  btn.classList.add('sel');
-}
-function reveal(btn){
-  const quiz=btn.closest('.quiz');
-  quiz.querySelectorAll('.opt').forEach(o=>{
-    if(o.dataset.correct==='1')o.classList.add('correct');
-    else if(o.classList.contains('sel'))o.classList.add('wrong');
+  document.querySelectorAll('#hoursRow button').forEach(b=>{
+    b.onclick=()=>{ state.hours=+b.dataset.h; syncBrush(); };
   });
-  quiz.querySelector('.ans').classList.add('show');
-  btn.style.display='none';
+  syncBrush();
 }
-function cp(btn){const t=btn.parentElement.querySelector('pre').innerText;
-  navigator.clipboard.writeText(t).then(()=>{toast('프롬프트가 복사되었습니다 ✓');const o=btn.textContent;btn.textContent='복사됨 ✓';setTimeout(()=>btn.textContent=o,1400);});}
-function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._i);t._i=setTimeout(()=>t.classList.remove('show'),1600);}
+function syncBrush(){
+  document.querySelectorAll('#brush button').forEach(b=>b.classList.toggle('on',b.dataset.b===state.brush));
+  document.querySelectorAll('#hoursRow button').forEach(b=>b.classList.toggle('on',+b.dataset.h===state.hours));
+  const isLec=(state.brush==='lv1'||state.brush==='lv2');
+  document.getElementById('hoursRow').style.display = isLec?'':'none';
+  document.getElementById('needRow').style.display = (state.brush==='need')?'':'none';
+}
 
-document.addEventListener('keydown',e=>{
-  if(document.getElementById('xlsmodal').classList.contains('show')){if(e.key==='Escape')closeXls();return;}
-  if(document.getElementById('promptmodal').classList.contains('show')){if(e.key==='Escape')closePmt();return;}
-  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();go(1);}
-  else if(e.key==='ArrowLeft'||e.key==='PageUp'){go(-1);}
-  else if(e.key==='Home')show(0);else if(e.key==='End')show(slides.length-1);
-  else if(e.key.toLowerCase()==='o')toggleOverview();
-  else if(e.key.toLowerCase()==='f')toggleFs();
-  else if(e.key==='Escape')document.getElementById('overview').classList.remove('show');
-});
-let x0=null;
-document.addEventListener('touchstart',e=>x0=e.touches[0].clientX,{passive:true});
-document.addEventListener('touchend',e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0;if(Math.abs(dx)>60)go(dx<0?1:-1);x0=null;},{passive:true});
+/* ---------- 달력 렌더 ---------- */
+function render(){
+  const cal=document.getElementById('cal'); cal.innerHTML='';
+  const admin = state.mode==='admin' && state.isAdmin;
+  const counts={};
+  if(admin) state.applications.forEach(a=>{ eachDay(a.start,a.end,ds=>counts[ds]=(counts[ds]||0)+1); });
 
-show(0);
+  MONTHS.forEach(([y,m])=>{
+    const mo=document.createElement('div'); mo.className='month';
+    const title=document.createElement('div'); title.className='month-title';
+    title.textContent=`${y}년 ${m}월`; mo.appendChild(title);
+    const grid=document.createElement('div'); grid.className='grid';
+    DOW.forEach((d,i)=>{ const el=document.createElement('div');
+      el.className='dow'+(i===0?' sun':'')+(i===6?' sat':''); el.textContent=d; grid.appendChild(el); });
+    const first=new Date(y,m-1,1).getDay();
+    const days=new Date(y,m,0).getDate();
+    for(let i=0;i<first;i++){ const e=document.createElement('div'); e.className='cell empty'; grid.appendChild(e); }
+    for(let d=1;d<=days;d++){
+      const ds=key(y,m,d);
+      const cell=document.createElement('div'); cell.className='cell'; cell.dataset.date=ds;
+      if(isRed(y,m,d)) cell.classList.add('red');
+      const lec=state.lectures[ds];
+      if(lec) cell.classList.add(lec.level===2?'lv2':'lv1');
+      else if(state.noLecture.includes(ds)) cell.classList.add('nolec');
+      if(state.mode==='user' && state.selStart){
+        const s=state.selStart, e=state.selEnd||state.selStart;
+        if(ds>=s && ds<=e) cell.classList.add('in-range');
+        if(ds===state.selStart || ds===state.selEnd) cell.classList.add('range-edge');
+      }
+      if(ds===TODAY) cell.classList.add('today');
+      let html=`<div class="num">${d}</div>`;
+      if(HOLIDAYS[ds]) html+=`<div class="hol">${HOLIDAYS[ds]}</div>`;
+      if(ds===TODAY) html+=`<div class="todaylbl">오늘</div>`;
+      cell.innerHTML=html;
+      if(lec){ const t=document.createElement('div'); t.className=`tag t-lv${lec.level}`;
+        t.textContent=`L${lec.level}·${lec.hours}H`; cell.appendChild(t); }
+      else if(state.noLecture.includes(ds)){ const t=document.createElement('div');
+        t.className='tag t-nolec'; t.textContent='강의없음'; cell.appendChild(t); }
+      if(admin && counts[ds]){ const dot=document.createElement('div');
+        dot.className='dot'; dot.textContent=counts[ds]; cell.appendChild(dot); }
+      const need=state.required[ds];
+      if(need){ const nc=document.createElement('div'); nc.className='need'; nc.textContent=`필요${need}`;
+        if(admin){ const c=counts[ds]||0; nc.classList.add(c>=need?'ok':'short'); nc.textContent=`${c}/${need}`; }
+        cell.appendChild(nc); }
+      cell.onclick=()=>onDayClick(ds);
+      grid.appendChild(cell);
+    }
+    mo.appendChild(grid); cal.appendChild(mo);
+  });
+  if(admin){ renderSettingLists(); renderAdminTable(); }
+}
+
+function eachDay(start,end,cb){
+  let cur=new Date(start), last=new Date(end);
+  while(cur<=last){ cb(`${cur.getFullYear()}-${pad(cur.getMonth()+1)}-${pad(cur.getDate())}`);
+    cur.setDate(cur.getDate()+1); }
+}
+
+/* ---------- 날짜 클릭 ---------- */
+function onDayClick(ds){
+  if(state.mode==='admin' && state.isAdmin){ applyBrush(ds); return; }
+  if(state.mode!=='user') return;
+  if(!state.selStart || (state.selStart && state.selEnd)){ state.selStart=ds; state.selEnd=null; }
+  else { if(ds>=state.selStart) state.selEnd=ds; else { state.selEnd=state.selStart; state.selStart=ds; } }
+  document.getElementById('selStart').textContent = state.selStart?fmt(state.selStart):'—';
+  document.getElementById('selEnd').textContent = state.selEnd?fmt(state.selEnd):(state.selStart?'(하루 근무)':'—');
+  render();
+}
+function applyBrush(ds){
+  const b=state.brush;
+  const idx=state.noLecture.indexOf(ds);
+  if(b==='clear'){ delete state.lectures[ds]; delete state.required[ds]; if(idx>=0) state.noLecture.splice(idx,1); }
+  else if(b==='need'){
+    const v=parseInt(document.getElementById('needCount').value,10)||0;
+    if(v<=0) delete state.required[ds]; else state.required[ds]=v;
+  }
+  else if(b==='nolec'){
+    delete state.lectures[ds];
+    if(idx>=0) state.noLecture.splice(idx,1); else state.noLecture.push(ds);
+  } else { // lv1 / lv2
+    if(idx>=0) state.noLecture.splice(idx,1);
+    const level=b==='lv2'?2:1;
+    const cur=state.lectures[ds];
+    if(cur && cur.level===level && cur.hours===state.hours) delete state.lectures[ds]; // 같은 설정 재클릭 → 해제
+    else state.lectures[ds]={level, hours:state.hours};
+  }
+  state.noLecture.sort(); save(); render();
+}
+
+/* ---------- 관리자: 설정 목록 ---------- */
+function renderSettingLists(){
+  const lecBox=document.getElementById('lecList');
+  const lecKeys=Object.keys(state.lectures).sort();
+  lecBox.innerHTML = lecKeys.length ? lecKeys.map(ds=>{
+    const l=state.lectures[ds];
+    return `<span class="badge b-lv${l.level}" onclick="removeLec('${ds}')" title="클릭하면 삭제">레벨${l.level} · ${l.hours}시간 · ${fmt(ds)} <span class="x">✕</span></span>`;
+  }).join('') : '<p class="hint">아직 없습니다.</p>';
+
+  const needBox=document.getElementById('needList');
+  const needKeys=Object.keys(state.required).sort();
+  needBox.innerHTML = needKeys.length ? needKeys.map(ds=>
+    `<span class="badge b-need" onclick="removeNeed('${ds}')" title="클릭하면 삭제">${fmt(ds)} · ${state.required[ds]}명 <span class="x">✕</span></span>`
+  ).join('') : '<p class="hint">아직 없습니다.</p>';
+
+  const nBox=document.getElementById('nolecList');
+  nBox.innerHTML = state.noLecture.length ? state.noLecture.map(ds=>
+    `<span class="badge b-nolec" onclick="removeNolec('${ds}')" title="클릭하면 삭제">${fmt(ds)} <span class="x">✕</span></span>`
+  ).join('') : '<p class="hint">아직 없습니다.</p>';
+}
+function removeLec(ds){ delete state.lectures[ds]; save(); render(); }
+function removeNeed(ds){ delete state.required[ds]; save(); render(); }
+function removeNolec(ds){ const i=state.noLecture.indexOf(ds); if(i>=0) state.noLecture.splice(i,1); save(); render(); }
+
+/* ---------- 관리자: 지원자 표 ---------- */
+function renderAdminTable(){
+  const box=document.getElementById('adminTable');
+  if(!state.applications.length){ box.innerHTML='<div class="empty-msg">아직 지원자가 없습니다.</div>'; return; }
+  const sorted=[...state.applications].sort((a,b)=>a.start.localeCompare(b.start));
+  let rows=sorted.map(a=>{
+    const days=daysBetween(a.start,a.end);
+    const same=a.start===a.end;
+    return `<tr>
+      <td><b>${escapeHtml(a.name)}</b></td>
+      <td>${fmt(a.start)}</td>
+      <td>${same?'<span class="pill">하루</span>':fmt(a.end)}</td>
+      <td><span class="pill">${days}일</span></td>
+      <td><button class="del" onclick="deleteApp('${a.id}')">삭제</button></td>
+    </tr>`;
+  }).join('');
+  box.innerHTML=`<table><thead><tr><th>이름</th><th>시작일</th><th>종료일</th><th>기간</th><th></th></tr></thead>
+    <tbody>${rows}</tbody></table>
+    <p class="hint" style="margin-top:12px">총 <b>${state.applications.length}</b>건의 지원 · 달력의 초록색 숫자는 해당 날짜의 지원자 수입니다.</p>`;
+}
+function daysBetween(s,e){ return Math.round((new Date(e)-new Date(s))/86400000)+1; }
+function deleteApp(id){ state.applications=state.applications.filter(a=>a.id!==id); save();
+  toast('지원 내역을 삭제했습니다'); render(); }
+function escapeHtml(s){ return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ---------- 지원 제출 ---------- */
+function clearSelection(silent){
+  state.selStart=null; state.selEnd=null;
+  document.getElementById('selStart').textContent='—';
+  document.getElementById('selEnd').textContent='—';
+  const n=document.getElementById('applName'); if(n && !silent) n.value='';
+  render();
+}
+function submitApplication(){
+  const name=document.getElementById('applName').value.trim();
+  if(!state.selStart){ toast('시작일을 선택해주세요'); return; }
+  if(!name){ toast('이름을 입력해주세요'); return; }
+  const end=state.selEnd||state.selStart;
+  state.applications.push({ id:Date.now()+'-'+Math.floor(performance.now()), name, start:state.selStart, end });
+  save(); toast(`${name}님, 지원이 완료되었습니다`); clearSelection();
+}
+
+/* ---------- 시작 ---------- */
+(function(){
+  const w=['일','월','화','수','목','금','토'][_now.getDay()];
+  document.getElementById('todayChip').textContent=`오늘 · ${fmt(TODAY)} (${w})`;
+})();
+initBrush();
+render();
 </script>
 </body>
 </html>
